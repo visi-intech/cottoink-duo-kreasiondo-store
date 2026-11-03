@@ -1,0 +1,23 @@
+{
+    "odoo_db1_mc": {
+        "url": "http://116.254.101.240:8069/jsonrpc",
+        "server_name": "MC",
+        "db": "kecmhick-live",
+        "username": "admin",
+        "password": "993f68fd3df1f930d79027cdd52c63cdb545b304"
+    },
+    "odoo_db1_a": {
+        "url": "http://172.16.186.51:8069/jsonrpc",
+        "server_name": "Store Kemchick PIK",
+        "db": "store-pik-live-2025",
+        "username": "admin",
+        "password": "f2dad1d50335c04228a96826695d1cf0626b52eb"
+    },
+    "odoo_db2_a": {
+        "url": "http://pos-store.visi-intech.com/jsonrpc",
+        "server_name": "Store 02",
+        "db": "store-02",
+        "username": "admin",
+        "password": "658b2da4bdec6d2dc882a3ac5510476ac006598d"
+    }
+}

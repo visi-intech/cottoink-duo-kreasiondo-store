@@ -1,0 +1,10 @@
+<odoo>
+  <data>
+    <!-- form view-->
+    <menuitem id="log_note_menu_root" name="Log Note">
+        <menuitem id="log_note_first_level_menu" name="Log Note">
+            <menuitem id="log_note_model_menu_action" action="log_note_action"/>
+        </menuitem>
+    </menuitem>
+  </data>
+</odoo>

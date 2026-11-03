@@ -1,0 +1,68 @@
+<odoo>
+  <data>
+
+    <!-- Inherit form view Loyalty Program -->
+    <record model="ir.ui.view" id="view_loyalty_program_form_custom">
+      <field name="name">loyalty.program.form.custom</field>
+      <field name="model">loyalty.program</field>
+      <field name="inherit_id" ref="loyalty.loyalty_program_view_form"/>
+      <field name="arch" type="xml">
+
+        <!-- Tambahkan field tambahan -->
+        <xpath expr="//field[@name='date_to']" position="after">
+            <!-- <field name="allowed_days"/>
+            <field name="start_time"/>
+            <field name="end_time"/>
+            <field name="allowed_partner_ids" widget="many2many_tags"/>
+            <field name="is_member"/> -->
+
+            <field name="is_integrated"/>
+            <field name="vit_trxid"/>
+            <field name="id_mc"/>
+        </xpath>
+        <xpath expr="//page[@name='rules_rewards']" position="after">
+            <page string="Schedules" name="schedules">
+                <field name="schedule_ids">
+                    <tree editable="bottom">
+                        <field name="days"/>
+                        <field name="time_start" widget="time"/>
+                        <field name="time_end" widget="time"/>
+                    </tree>
+                </field>
+            </page>
+        </xpath>
+        <xpath expr="//page[@name='rules_rewards']" position="after">
+            <page string="Member Promo" name="member">
+                <field name="member_ids">
+                    <tree editable="bottom">
+                        <field name="member_pos"/>
+                    </tree>
+                </field>
+            </page>
+        </xpath>
+        <xpath expr="//page[@name='rules_rewards']" position="after">
+            <page string="Redeem Point" name="redeem" invisible="program_type != 'loyalty'">
+                <group>
+                    <field name="vit_konversi_poin"/>
+                </group>
+            </page>
+        </xpath>
+
+        <!-- readonly handling -->
+        <xpath expr="//field[@name='is_integrated']" position="attributes">
+          <attribute name="force_save">1</attribute>
+          <attribute name="readonly">True</attribute>
+        </xpath>
+        <xpath expr="//field[@name='vit_trxid']" position="attributes">
+          <attribute name="force_save">1</attribute>
+          <attribute name="readonly">True</attribute>
+        </xpath>
+        <xpath expr="//field[@name='id_mc']" position="attributes">
+          <attribute name="force_save">1</attribute>
+          <attribute name="readonly">True</attribute>
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</odoo>

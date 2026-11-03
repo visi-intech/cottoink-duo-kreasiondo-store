@@ -1,0 +1,24 @@
+<odoo>
+    <record id="view_product_product_multi_barcode" model="ir.ui.view">
+        <field name="name">product.product.multi.barcode</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+                <field name="id_mc"/>
+                <field name="is_fixed_price"/>
+                <field name="brand"/>
+            </xpath>
+            <xpath expr="//page[@name='invoicing']" position="after">
+                <page string="Barcodes">
+                    <field name="multi_barcode_ids" readonly="1">
+                        <tree>
+                            <field name="barcode"/>
+                            <field name="product_tmpl_id"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
