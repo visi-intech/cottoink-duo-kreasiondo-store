@@ -54,5 +54,6 @@ from . import loyalty_history
 from . import pos_payment
 from . import tuning_invoice_creation
 from . import customer_group
+from . import merchandise_category
 # from . import print_barcode
 # from . import master_type

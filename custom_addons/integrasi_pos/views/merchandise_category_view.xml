@@ -1,0 +1,107 @@
+
+<odoo>
+  <data>
+
+    <record id="view_vit_merchandise_category_tree" model="ir.ui.view">
+      <field name="name">vit.merchandise.category.tree</field>
+      <field name="model">vit.merchandise.category</field>
+      <field name="arch" type="xml">
+        <tree string="Merchandise Category" create="0" edit="0" delete="0">
+          <field name="vit_artikel_code"/>
+          <field name="vit_mc_code"/>
+          <field name="vit_category"/>
+          <field name="vit_sub_category"/>
+          <field name="vit_brand"/>
+          <field name="vit_color"/>
+          <field name="vit_size"/>
+          <field name="vit_collection" optional="hide"/>
+          <field name="vit_upload_by" optional="hide"/>
+          <field name="vit_excel_filename" optional="hide"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_vit_merchandise_category_form" model="ir.ui.view">
+      <field name="name">vit.merchandise.category.form</field>
+      <field name="model">vit.merchandise.category</field>
+      <field name="arch" type="xml">
+        <form string="Merchandise Category" create="0" edit="0" delete="0">
+          <sheet>
+            <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+            <field name="active" invisible="1"/>
+            <div class="oe_title">
+              <label for="vit_artikel_code"/>
+              <h1><field name="vit_artikel_code"/></h1>
+            </div>
+            <group>
+              <group string="Artikel">
+                <field name="vit_size_range"/>
+                <field name="vit_mc_code"/>
+                <field name="vit_flag_code"/>
+                <field name="vit_flag"/>
+                <field name="vit_style_code"/>
+                <field name="vit_style"/>
+              </group>
+              <group string="Category &amp; Brand">
+                <field name="vit_category_code"/>
+                <field name="vit_category"/>
+                <field name="vit_sub_category_code"/>
+                <field name="vit_sub_category"/>
+                <field name="vit_brand_code"/>
+                <field name="vit_brand"/>
+                <field name="vit_sub_brand_code"/>
+                <field name="vit_sub_brand"/>
+              </group>
+              <group string="Color, Size &amp; Label">
+                <field name="vit_color_code"/>
+                <field name="vit_color"/>
+                <field name="vit_size_code"/>
+                <field name="vit_size"/>
+                <field name="vit_label_code"/>
+                <field name="vit_label"/>
+              </group>
+              <group string="Period &amp; Collection">
+                <field name="vit_week_code"/>
+                <field name="vit_week"/>
+                <field name="vit_quarter_code"/>
+                <field name="vit_quarter"/>
+                <field name="vit_collection"/>
+              </group>
+              <group string="Upload Info">
+                <field name="vit_upload_by"/>
+                <field name="vit_excel_filename"/>
+                <field name="id_mc"/>
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_vit_merchandise_category_search" model="ir.ui.view">
+      <field name="name">vit.merchandise.category.search</field>
+      <field name="model">vit.merchandise.category</field>
+      <field name="arch" type="xml">
+        <search string="Merchandise Category">
+          <field name="vit_artikel_code"/>
+          <field name="vit_mc_code"/>
+          <field name="vit_category"/>
+          <field name="vit_brand"/>
+          <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+          <group expand="0" string="Group By">
+            <filter name="group_category" string="Category" context="{'group_by': 'vit_category'}"/>
+            <filter name="group_brand" string="Brand" context="{'group_by': 'vit_brand'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_vit_merchandise_category" model="ir.actions.act_window">
+      <field name="name">Merchandise Category</field>
+      <field name="res_model">vit.merchandise.category</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_vit_merchandise_category_search"/>
+    </record>
+
+  </data>
+</odoo>

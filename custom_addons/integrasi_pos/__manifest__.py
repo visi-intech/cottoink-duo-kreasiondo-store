@@ -66,6 +66,7 @@
         'views/stock_warehouse_view.xml',
         'views/stock_quant_view.xml',
         'views/customer_group_view.xml',
+        'views/merchandise_category_view.xml',
         # 'views/favicon_pos.xml',
         # 'views/printer_list_view.xml',
     ],

@@ -14,6 +14,38 @@ class ProductTemplate(models.Model):
     is_fixed_price = fields.Boolean(string="Fixed Price", readonly=True)
     brand = fields.Char(string="Brand", readonly=True)
 
+        # ── Merchandise Category (dari MC) ─────────────────────
+    vit_merchandise_category_id = fields.Many2one(
+        'vit.merchandise.category', string="Merchandise Category",
+        readonly=True, ondelete='restrict', index=True)
+    vit_artikel_code = fields.Char(related='vit_merchandise_category_id.vit_artikel_code', store=True)
+    vit_size_range = fields.Char(related='vit_merchandise_category_id.vit_size_range', store=True)
+    vit_mc_code = fields.Char(related='vit_merchandise_category_id.vit_mc_code', store=True)
+    vit_flag_code = fields.Char(related='vit_merchandise_category_id.vit_flag_code', store=True)
+    vit_flag = fields.Char(related='vit_merchandise_category_id.vit_flag', store=True)
+    vit_style_code = fields.Char(related='vit_merchandise_category_id.vit_style_code', store=True)
+    vit_style = fields.Char(related='vit_merchandise_category_id.vit_style', store=True)
+    vit_sub_category_code = fields.Char(related='vit_merchandise_category_id.vit_sub_category_code', store=True)
+    vit_sub_category = fields.Char(related='vit_merchandise_category_id.vit_sub_category', store=True)
+    vit_category_code = fields.Char(related='vit_merchandise_category_id.vit_category_code', store=True)
+    vit_category = fields.Char(related='vit_merchandise_category_id.vit_category', store=True)
+    vit_sub_brand_code = fields.Char(related='vit_merchandise_category_id.vit_sub_brand_code', store=True)
+    vit_sub_brand = fields.Char(related='vit_merchandise_category_id.vit_sub_brand', store=True)
+    vit_brand_code = fields.Char(related='vit_merchandise_category_id.vit_brand_code', store=True)
+    vit_brand = fields.Char(related='vit_merchandise_category_id.vit_brand', store=True)
+    vit_color_code = fields.Char(related='vit_merchandise_category_id.vit_color_code', store=True)
+    vit_color = fields.Char(related='vit_merchandise_category_id.vit_color', store=True)
+    vit_size_code = fields.Char(related='vit_merchandise_category_id.vit_size_code', store=True)
+    vit_size = fields.Char(related='vit_merchandise_category_id.vit_size', store=True)
+    vit_label_code = fields.Char(related='vit_merchandise_category_id.vit_label_code', store=True)
+    vit_label = fields.Char(related='vit_merchandise_category_id.vit_label', store=True)
+    vit_week_code = fields.Char(related='vit_merchandise_category_id.vit_week_code', store=True)
+    vit_week = fields.Char(related='vit_merchandise_category_id.vit_week', store=True)
+    vit_quarter_code = fields.Char(related='vit_merchandise_category_id.vit_quarter_code', store=True)
+    vit_quarter = fields.Char(related='vit_merchandise_category_id.vit_quarter', store=True)
+    vit_collection = fields.Char(related='vit_merchandise_category_id.vit_collection', store=True)
+
+
     def write(self, vals):
         # # Field-field yang readonly - tidak boleh diubah
         # readonly_fields = [

@@ -51,6 +51,52 @@
         <field name="product_tag_ids" position="attributes">
           <attribute name="force_save">1</attribute>
         </field>
+
+        <xpath expr="//notebook" position="inside">
+            <page string="Merchandise Category" name="merchandise_category">
+                <group>
+                    <group>
+                        <field name="vit_merchandise_category_id" readonly="1"/>
+                    </group>
+                </group>
+                <group invisible="not vit_merchandise_category_id">
+                    <group string="Artikel">
+                        <field name="vit_artikel_code"/>
+                        <field name="vit_size_range"/>
+                        <field name="vit_mc_code"/>
+                        <field name="vit_flag_code"/>
+                        <field name="vit_flag"/>
+                        <field name="vit_style_code"/>
+                        <field name="vit_style"/>
+                    </group>
+                    <group string="Category &amp; Brand">
+                        <field name="vit_category_code"/>
+                        <field name="vit_category"/>
+                        <field name="vit_sub_category_code"/>
+                        <field name="vit_sub_category"/>
+                        <field name="vit_brand_code"/>
+                        <field name="vit_brand"/>
+                        <field name="vit_sub_brand_code"/>
+                        <field name="vit_sub_brand"/>
+                    </group>
+                    <group string="Color, Size &amp; Label">
+                        <field name="vit_color_code"/>
+                        <field name="vit_color"/>
+                        <field name="vit_size_code"/>
+                        <field name="vit_size"/>
+                        <field name="vit_label_code"/>
+                        <field name="vit_label"/>
+                    </group>
+                    <group string="Period &amp; Collection">
+                        <field name="vit_week_code"/>
+                        <field name="vit_week"/>
+                        <field name="vit_quarter_code"/>
+                        <field name="vit_quarter"/>
+                        <field name="vit_collection"/>
+                    </group>
+                </group>
+            </page>
+        </xpath>
         
         <xpath expr="//page[@name='invoicing']" position="after">
             <page string="Barcodes">

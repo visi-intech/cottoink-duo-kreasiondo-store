@@ -23,3 +23,4 @@ access_loyalty_program_schedule,access_loyalty.program.schedule,model_loyalty_pr
 access_wizard_generate_stock_ledger,access_wizard.generate.stock.ledger,model_wizard_generate_stock_ledger,base.group_user,1,1,1,1
 access_end_shift_line_pin_wizard,access_end.shift.line.pin.wizard,model_end_shift_line_pin_wizard,base.group_user,1,1,1,1
 access_customer_group,access_customer.group,model_customer_group,base.group_user,1,1,1,1
+access_vit_merchandise_category,access_vit.merchandise.category,model_vit_merchandise_category,base.group_user,1,1,1,1
