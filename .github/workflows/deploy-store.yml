@@ -46,9 +46,13 @@ jobs:
       # Odoo hanya meng-upgrade modul yang sudah ter-install, yang belum di-skip
       MODULES: 'integrasi_pos,integrasi_pos_loyalty,custom_pos_receipt,custom_receipts_for_pos,pos_receipt_extend,salesperson_pos_order_line'
 
+    defaults:
+      run:
+        # Execution Policy server = Restricted, jadi script step dijalankan dengan -ExecutionPolicy Bypass
+        # (hanya untuk proses ini, setting server tidak diubah). Perilaku lain disamakan dengan shell 'powershell' bawaan.
+        shell: 'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "$ErrorActionPreference = ''Stop''; . ''{0}''; if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }"'
     steps:
       - name: Validasi konfigurasi
-        shell: powershell
         run: |
           # Odoo akan MEMBUAT database baru kalau -d menunjuk DB yang tidak ada,
           # jadi pastikan nama DB sudah diisi dengan benar.
@@ -71,18 +75,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Copy custom_addons ke server
-        shell: powershell
         run: |
           robocopy "$env:GITHUB_WORKSPACE\custom_addons" "$env:ADDONS_TARGET" /MIR /XD __pycache__ /XF *.pyc /NFL /NDL /NP
           if ($LASTEXITCODE -ge 8) { exit $LASTEXITCODE }   # robocopy: 0-7 = sukses
           exit 0
 
       - name: Stop Odoo
-        shell: powershell
         run: Stop-Service -Name $env:ODOO_SERVICE -Force
 
       - name: Upgrade modul
-        shell: powershell
         run: |
           & "$env:ODOO_DIR\python\python.exe" "$env:ODOO_DIR\server\odoo-bin" `
             -c "$env:ODOO_DIR\server\odoo.conf" -d $env:ODOO_DB `
@@ -91,11 +92,9 @@ jobs:
 
       - name: Start Odoo
         if: always()                     # tetap start walau upgrade gagal
-        shell: powershell
         run: Start-Service -Name $env:ODOO_SERVICE
 
       - name: Health check
-        shell: powershell
         run: |
           Start-Sleep -Seconds 15
           $r = Invoke-WebRequest -Uri "http://localhost:$env:ODOO_PORT/web/login" -UseBasicParsing -TimeoutSec 60
