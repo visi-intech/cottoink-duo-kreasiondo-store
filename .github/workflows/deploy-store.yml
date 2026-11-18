@@ -1,0 +1,98 @@
+# Auto deploy ke server Store (172.16.186.3 & 172.16.186.4)
+# Tiap server punya self-hosted runner sendiri:
+#   172.16.186.3 -> label: store-186-3
+#   172.16.186.4 -> label: store-186-4
+name: Deploy Store
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'custom_addons/**'
+      - '.github/workflows/deploy-store.yml'
+  workflow_dispatch:        # bisa dijalankan manual dari tab Actions
+
+jobs:
+  deploy:
+    name: Deploy ${{ matrix.name }}
+    runs-on: [self-hosted, windows, '${{ matrix.label }}']
+    concurrency:
+      group: deploy-${{ matrix.label }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false        # kalau satu server gagal, server lain tetap jalan
+      matrix:
+        include:
+          - name: Store 172.16.186.3
+            label: store-186-3
+            odoo_dir: 'C:\Program Files\Odoo 17.0.20250624'
+            addons_target: 'C:\Program Files\Odoo 17.0.20250624\server\POSVIT\cottoink-duo-kreasiondo-store\custom_addons'
+            odoo_service: 'odoo-server-17.0'
+            odoo_db: 'cdk_kokas_testing'
+            port: 8069
+          - name: Store 172.16.186.4
+            label: store-186-4
+            odoo_dir: 'C:\Program Files\Odoo 17.0.20250624'
+            addons_target: 'D:\Odoo\cottoink-duo-kreasiondo-store\custom_addons'
+            odoo_service: 'odoo-server-17.0'
+            odoo_db: 'cdk_bdg_testing'
+            port: 8069
+    env:
+      ODOO_DIR: ${{ matrix.odoo_dir }}
+      ADDONS_TARGET: ${{ matrix.addons_target }}
+      ODOO_SERVICE: ${{ matrix.odoo_service }}
+      ODOO_DB: ${{ matrix.odoo_db }}
+      ODOO_PORT: ${{ matrix.port }}
+      # Odoo hanya meng-upgrade modul yang sudah ter-install, yang belum di-skip
+      MODULES: 'integrasi_pos,integrasi_pos_loyalty,custom_pos_receipt,custom_receipts_for_pos,pos_receipt_extend,salesperson_pos_order_line'
+
+    steps:
+      - name: Validasi konfigurasi
+        shell: powershell
+        run: |
+          # Odoo akan MEMBUAT database baru kalau -d menunjuk DB yang tidak ada,
+          # jadi pastikan nama DB sudah diisi dengan benar.
+          if ($env:ODOO_DB -like 'TODO*' -or [string]::IsNullOrWhiteSpace($env:ODOO_DB)) {
+            Write-Error "ODOO_DB belum diisi untuk ${{ matrix.name }}"; exit 1
+          }
+          if (-not (Test-Path "$env:ODOO_DIR\server\odoo-bin")) {
+            Write-Error "odoo-bin tidak ditemukan di $env:ODOO_DIR"; exit 1
+          }
+          if (-not (Get-Service -Name $env:ODOO_SERVICE -ErrorAction SilentlyContinue)) {
+            Write-Error "Service $env:ODOO_SERVICE tidak ditemukan"; exit 1
+          }
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy custom_addons ke server
+        shell: powershell
+        run: |
+          robocopy "$env:GITHUB_WORKSPACE\custom_addons" "$env:ADDONS_TARGET" /MIR /XD __pycache__ /XF *.pyc /NFL /NDL /NP
+          if ($LASTEXITCODE -ge 8) { exit $LASTEXITCODE }   # robocopy: 0-7 = sukses
+          exit 0
+
+      - name: Stop Odoo
+        shell: powershell
+        run: Stop-Service -Name $env:ODOO_SERVICE -Force
+
+      - name: Upgrade modul
+        shell: powershell
+        run: |
+          & "$env:ODOO_DIR\python\python.exe" "$env:ODOO_DIR\server\odoo-bin" `
+            -c "$env:ODOO_DIR\server\odoo.conf" -d $env:ODOO_DB `
+            -u $env:MODULES --stop-after-init
+          exit $LASTEXITCODE
+
+      - name: Start Odoo
+        if: always()                     # tetap start walau upgrade gagal
+        shell: powershell
+        run: Start-Service -Name $env:ODOO_SERVICE
+
+      - name: Health check
+        shell: powershell
+        run: |
+          Start-Sleep -Seconds 15
+          $r = Invoke-WebRequest -Uri "http://localhost:$env:ODOO_PORT/web/login" -UseBasicParsing -TimeoutSec 60
+          if ($r.StatusCode -ne 200) { exit 1 }
+          Write-Output "Odoo ${{ matrix.name }} up"
