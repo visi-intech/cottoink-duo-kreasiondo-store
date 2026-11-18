@@ -32,7 +32,7 @@ jobs:
             port: 8069
           - name: Store 172.16.186.4
             label: store-186-4
-            odoo_dir: 'C:\Program Files\Odoo 17.0.20250624'
+            odoo_dir: 'D:Odoo'
             addons_target: 'D:\Odoo\cottoink-duo-kreasiondo-store\custom_addons'
             odoo_service: 'odoo-server-17.0'
             odoo_db: 'cdk_bdg_testing'
