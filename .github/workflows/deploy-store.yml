@@ -26,7 +26,7 @@ jobs:
           - name: Store 172.16.186.3
             label: store-186-3
             odoo_dir: 'C:\Program Files\Odoo 17.0.20251020'
-            addons_target: 'C:\Program Files\Odoo 17.0.20251020\server\POSVIT\cottoink-duo-kreasiondo-store\custom_addons'
+            addons_target: 'C:\Program Files\Odoo 17.0.20251020\server\custom_addon\cottoink-duo-kreasiondo-store\custom_addons'
             odoo_service: 'odoo-server-17.0'
             odoo_db: 'cdk_kokas_testing'
             port: 8069
