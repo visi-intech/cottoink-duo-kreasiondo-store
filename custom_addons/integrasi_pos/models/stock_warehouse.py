@@ -5,6 +5,7 @@ class StockWarehouseInherit(models.Model):
     _inherit = 'stock.warehouse'
 
     prefix_code = fields.Char(string="Prefix Customer Code", help="Used when POS is configured to override customer code prefix.")
+    code = fields.Char(size=20)
     
     show_prefix_code = fields.Boolean(string="Show Prefix Code", compute="_compute_show_prefix_code")
 
