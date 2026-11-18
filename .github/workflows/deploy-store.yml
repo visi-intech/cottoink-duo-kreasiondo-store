@@ -25,8 +25,8 @@ jobs:
         include:
           - name: Store 172.16.186.3
             label: store-186-3
-            odoo_dir: 'C:\Program Files\Odoo 17.0.20250624'
-            addons_target: 'C:\Program Files\Odoo 17.0.20250624\server\POSVIT\cottoink-duo-kreasiondo-store\custom_addons'
+            odoo_dir: 'C:\Program Files\Odoo 17.0.20251020'
+            addons_target: 'C:\Program Files\Odoo 17.0.20251020\server\POSVIT\cottoink-duo-kreasiondo-store\custom_addons'
             odoo_service: 'odoo-server-17.0'
             odoo_db: 'cdk_kokas_testing'
             port: 8069
@@ -57,6 +57,11 @@ jobs:
           }
           if (-not (Test-Path "$env:ODOO_DIR\server\odoo-bin")) {
             Write-Error "odoo-bin tidak ditemukan di $env:ODOO_DIR"; exit 1
+          }
+          # Folder addons harus sudah ada (dan terdaftar di addons_path odoo.conf),
+          # supaya salah path tidak diam-diam membuat folder baru yang tidak dibaca Odoo.
+          if (-not (Test-Path $env:ADDONS_TARGET)) {
+            Write-Error "Folder addons tidak ditemukan: $env:ADDONS_TARGET"; exit 1
           }
           if (-not (Get-Service -Name $env:ODOO_SERVICE -ErrorAction SilentlyContinue)) {
             Write-Error "Service $env:ODOO_SERVICE tidak ditemukan"; exit 1
