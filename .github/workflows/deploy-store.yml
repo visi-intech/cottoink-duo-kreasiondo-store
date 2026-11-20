@@ -48,9 +48,10 @@ jobs:
 
     defaults:
       run:
-        # Execution Policy server = Restricted, jadi script step dijalankan dengan -ExecutionPolicy Bypass
-        # (hanya untuk proses ini, setting server tidak diubah). Perilaku lain disamakan dengan shell 'powershell' bawaan.
-        shell: 'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "$ErrorActionPreference = ''Stop''; . ''{0}''; if ((Test-Path -LiteralPath variable:\LASTEXITCODE)) { exit $LASTEXITCODE }"'
+        # Butuh Execution Policy server minimal RemoteSigned:
+        #   Set-ExecutionPolicy RemoteSigned -Scope LocalMachine -Force
+        shell: powershell
+
     steps:
       - name: Validasi konfigurasi
         run: |
