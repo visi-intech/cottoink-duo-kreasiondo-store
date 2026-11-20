@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data>
+    <!-- Delivery Slip: tambah Gudang Pengirim, Gudang Penerima, Transfer Type
+         di sebelah Shipping Date -->
+    <template id="report_delivery_document_vit_ts_info"
+              inherit_id="stock.report_delivery_document">
+      <xpath expr="//div[@name='div_sched_date']" position="after">
+        <div t-if="o.location_id" class="col-auto col-3 mw-100 mb-2" name="div_vit_ts_source_warehouse">
+          <strong>Gudang Pengirim:</strong>
+          <p class="m-0"
+             t-esc="o.location_id.display_name or ''"/>
+        </div>
+        <div t-if="o.location_dest_id" class="col-auto col-3 mw-100 mb-2" name="div_vit_ts_dest_warehouse">
+          <strong>Gudang Penerima:</strong>
+          <p class="m-0"
+             t-esc="o.location_dest_id.display_name or ''"/>
+        </div>
+        <div t-if="o.vit_ts_transfer_type_id" class="col-auto col-3 mw-100 mb-2" name="div_vit_ts_transfer_type">
+          <strong>Transfer Type:</strong>
+          <p class="m-0" t-field="o.vit_ts_transfer_type_id.name"/>
+        </div>
+      </xpath>
+    </template>
+  </data>
+</odoo>
