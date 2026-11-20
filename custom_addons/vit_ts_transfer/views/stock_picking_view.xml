@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data>
+    <!-- Input Transfer Type + gudang asal/tujuan pada form TS Out / TS In -->
+    <record model="ir.ui.view" id="view_stock_picking_form_vit_ts">
+      <field name="name">stock.picking.form.vit.ts</field>
+      <field name="model">stock.picking</field>
+      <field name="inherit_id" ref="stock.view_picking_form"/>
+      <field name="arch" type="xml">
+        <!-- TS Out -> TS In: TS In dibuat otomatis saat TS Out Done. Smart button hanya untuk group TS In Creator -->
+        <xpath expr="//div[@name='button_box']" position="inside">
+            <field name="vit_ts_is_ts_out" invisible="1"/>
+            <button name="vit_ts_action_view_ts_in" type="object" class="oe_stat_button" icon="fa-truck"
+                    groups="vit_ts_transfer.group_ts_in_creator"
+                    invisible="not vit_ts_is_ts_out or vit_ts_in_count == 0">
+                <field name="vit_ts_in_count" widget="statinfo" string="TS In"/>
+            </button>
+        </xpath>
+        <!-- Kolom kiri: Source & Destination Warehouse menggantikan posisi Source & Destination Location
+             pada TS Out / TS In. Field lokasi aslinya disembunyikan untuk dua tipe itu saja. -->
+        <xpath expr="//field[@name='location_dest_id'][@groups='stock.group_stock_multi_locations']" position="after">
+            <field name="vit_ts_warehouse_id"
+                   options="{'no_create': True, 'no_quick_create': True}"
+                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+                   required="vit_ts_is_ts_out"
+                   readonly="state in ['assigned', 'done', 'cancel'] or vit_ts_is_ts_in"/>
+            <field name="vit_ts_warehouse_dest_id"
+                   options="{'no_create': True, 'no_quick_create': True}"
+                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+                   required="vit_ts_is_ts_out"
+                   readonly="state in ['done', 'cancel'] or vit_ts_is_ts_in"/>
+        </xpath>
+        <xpath expr="//field[@name='location_id'][@groups='stock.group_stock_multi_locations']" position="attributes">
+            <attribute name="invisible">picking_type_code == 'incoming' or vit_ts_is_ts_out or vit_ts_is_ts_in</attribute>
+        </xpath>
+        <xpath expr="//field[@name='location_dest_id'][@groups='stock.group_stock_multi_locations']" position="attributes">
+            <attribute name="invisible">picking_type_code == 'outgoing' or vit_ts_is_ts_out or vit_ts_is_ts_in</attribute>
+        </xpath>
+        <xpath expr="//field[@name='origin']" position="after">
+            <field name="vit_ts_is_ts_in" invisible="1"/>
+            <field name="vit_ts_transfer_out_id"
+                   options="{'no_create': True, 'no_quick_create': True}"
+                   invisible="not vit_ts_is_ts_in"
+                   required="vit_ts_is_ts_in"
+                   readonly="state in ['done', 'cancel']"/>
+            <field name="vit_ts_transfer_type_id"
+                   options="{'no_quick_create': True}"
+                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+                   readonly="state in ['assigned', 'done']"/>
+            <!-- TS Out / TS In: Source & Destination Location dipindah ke sini dari kolom kiri
+                 (di kolom kiri diganti Source & Destination Warehouse). Dokumen lain tidak berubah. -->
+            <field name="location_id" options="{'no_create': True}"
+                   groups="stock.group_stock_multi_locations"
+                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+                   readonly="state in ['assigned', 'done', 'cancel']"/>
+            <field name="location_dest_id" options="{'no_create': True}"
+                   groups="stock.group_stock_multi_locations"
+                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+                   readonly="state in ['assigned', 'done', 'cancel']"/>
+        </xpath>
+        <!-- Dokumen TS In: Source Document bawaan disembunyikan, diganti TS Out Reference -->
+        <xpath expr="//field[@name='origin']" position="attributes">
+          <attribute name="invisible">vit_ts_is_ts_in</attribute>
+        </xpath>
+      </field>
+    </record>
+  </data>
+</odoo>

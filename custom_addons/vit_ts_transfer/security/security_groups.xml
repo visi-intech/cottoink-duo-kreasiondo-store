@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data>
+    <!-- Hak akses membuat / melihat TS In dari dokumen TS Out.
+         User dikasih hak ini lewat Settings > Users > tab Access Rights (kategori Inventory). -->
+    <record id="group_ts_in_creator" model="res.groups">
+      <field name="name">TS In Creator</field>
+      <field name="category_id" ref="base.module_category_inventory_inventory"/>
+      <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+      <field name="comment">Boleh membuat dan melihat dokumen TS In dari dokumen TS Out.</field>
+      <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+  </data>
+</odoo>

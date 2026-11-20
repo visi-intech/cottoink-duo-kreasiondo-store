@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data>
+    <menuitem
+      id="menu_transfer_root"
+      name="Transfer"
+      parent="stock.menu_stock_root"
+      sequence="15"/>
+
+    <record id="action_picking_ts_in" model="ir.actions.act_window">
+      <field name="name">TS In</field>
+      <field name="res_model">stock.picking</field>
+      <field name="view_mode">tree,kanban,form,calendar</field>
+      <field name="domain">[('picking_type_id.name', '=', 'TS In')]</field>
+      <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0], 'vit_ts_default_kind': 'ts_in'}</field>
+      <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Belum ada transfer dengan operation type TS In.
+        </p>
+      </field>
+    </record>
+
+    <record id="action_picking_ts_out" model="ir.actions.act_window">
+      <field name="name">TS Out</field>
+      <field name="res_model">stock.picking</field>
+      <field name="view_mode">tree,kanban,form,calendar</field>
+      <field name="domain">[('picking_type_id.name', '=', 'TS Out')]</field>
+      <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0], 'vit_ts_default_kind': 'ts_out'}</field>
+      <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">
+          Belum ada transfer dengan operation type TS Out.
+        </p>
+      </field>
+    </record>
+
+    <menuitem
+      id="menu_transfer_ts_in"
+      name="TS In"
+      action="action_picking_ts_in"
+      parent="menu_transfer_root"
+      sequence="2"/>
+
+    <menuitem
+      id="menu_transfer_ts_out"
+      name="TS Out"
+      action="action_picking_ts_out"
+      parent="menu_transfer_root"
+      sequence="3"/>
+
+    <!-- Master data Transfer Type -->
+    <record id="action_vit_ts_transfer_type" model="ir.actions.act_window">
+      <field name="name">Transfer Type</field>
+      <field name="res_model">vit.ts.transfer.type</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+      id="menu_vit_ts_transfer_type"
+      name="Transfer Type"
+      action="action_vit_ts_transfer_type"
+      parent="menu_transfer_root"
+      sequence="10"/>
+
+    <record id="view_vit_ts_transfer_type_tree" model="ir.ui.view">
+      <field name="name">vit.ts.transfer.type.tree</field>
+      <field name="model">vit.ts.transfer.type</field>
+      <field name="arch" type="xml">
+        <tree editable="bottom">
+          <field name="name"/>
+          <field name="active" widget="boolean_toggle"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_vit_ts_transfer_type_form" model="ir.ui.view">
+      <field name="name">vit.ts.transfer.type.form</field>
+      <field name="model">vit.ts.transfer.type</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="name"/>
+              <field name="active"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+  </data>
+</odoo>
