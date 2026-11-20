@@ -5,7 +5,8 @@
     <t t-name="point_of_sale.ProductCardList">
         <article 
             tabindex="0" 
-            t-attf-class="{{props.class}} product-list-item position-relative btn btn-light d-flex flex-column align-items-center justify-content-center p-3 m-0 text-center cursor-pointer transition-base w-100" 
+            t-attf-class="{{props.class}} product-list-item position-relative btn btn-light d-flex flex-column align-items-center justify-content-center p-3 m-0 text-center cursor-pointer transition-base w-100 {{ this.vitIsOutOfStock ? 'vit-out-of-stock' : '' }}"
+            t-att-aria-disabled="this.vitIsOutOfStock ? 'true' : 'false'"
             t-on-keypress="(event) => event.code === 'Space' ? props.onClick(event) : ()=>{}"
             t-on-click="props.onClick" 
             t-att-data-product-id="props.productId" 
@@ -21,6 +22,12 @@
                     title="Product Information" />
             </div>
             
+            <!-- LABEL STOK HABIS (stock_no_negative) -->
+            <span t-if="this.vitIsOutOfStock"
+                class="vit-out-of-stock-badge badge text-bg-danger position-absolute top-0 start-0 m-1">
+                Stok Habis
+            </span>
+
             <!-- BARIS 1: SKU -->
             <div class="product-list-sku-row mb-2" t-if="this.productSKU">
                 <span class="product-list-sku text-primary fw-bold">
