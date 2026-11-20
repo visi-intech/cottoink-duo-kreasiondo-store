@@ -12,13 +12,15 @@ on:
       - '.github/workflows/deploy-store.yml'
   workflow_dispatch:        # bisa dijalankan manual dari tab Actions
 
+# Run baru menunggu run sebelumnya selesai (kedua server dalam satu run tetap paralel)
+concurrency:
+  group: deploy-store
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy ${{ matrix.name }}
     runs-on: [self-hosted, windows, '${{ matrix.label }}']
-    concurrency:
-      group: deploy-${{ matrix.label }}
-      cancel-in-progress: false
     strategy:
       fail-fast: false        # kalau satu server gagal, server lain tetap jalan
       matrix:
