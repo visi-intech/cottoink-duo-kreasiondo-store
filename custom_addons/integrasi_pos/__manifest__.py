@@ -9,7 +9,7 @@
         POS-VIT 2.0 Store
     """,
     'author': "Visi Intech",
-    'depends': ['web', 'base', 'sale', 'stock', 'point_of_sale', 'account', 'loyalty', 'purchase', 'mail', 'mrp', 'stock_no_negative'],
+    'depends': ['web', 'base', 'sale', 'stock', 'point_of_sale', 'account', 'loyalty', 'purchase', 'mail', 'mrp', 'stock_no_negative', 'pos_discount'],
     'data': [
         'security/ir.model.access.csv',
         'views/res_partner_view.xml',
