@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """Integrasi PoS dengan modul stock_no_negative.
 
-Produk dianggap "ber-kontrol stok" (vit_pos_stock_control = True) jika:
-  - type == 'product' (storable), dan
-  - allow_negative_stock tidak aktif di produk, kategori, maupun lokasi
-    sumber PoS (picking_type_id.default_location_src_id).
+Setting-nya HANYA dibaca dari lokasi sumber PoS
+(pos.config -> picking_type_id -> default_location_src_id), field
+"Allow Negative Stock" di Inventory > Configuration > Locations:
+  - TIDAK dicentang : produk storable yang stoknya kosong tidak bisa dipilih
+                      maupun di-scan di PoS (vit_pos_stock_control = True).
+  - Dicentang       : PoS bebas menjual walau stok kosong.
+Setting allow_negative_stock di produk / kategori tidak dipakai di PoS.
+Produk non-storable (consumable / service) tidak punya stok, jadi tidak dicek.
 
 vit_pos_qty = stok di lokasi sumber PoS dikurangi qty order PoS yang sudah
 terbayar tapi belum punya picking (mode update stok "saat sesi ditutup"),
@@ -29,11 +33,9 @@ class ProductProduct(models.Model):
         if not self or not location or location.allow_negative_stock:
             return res
 
-        controlled = self.sudo().filtered(
-            lambda p: p.type == "product"
-            and not p.allow_negative_stock
-            and not p.categ_id.allow_negative_stock
-        )
+        # Kontrol stok hanya ditentukan oleh setting lokasi (di atas);
+        # cukup produk storable yang punya stok untuk dicek.
+        controlled = self.sudo().filtered(lambda p: p.type == "product")
         if not controlled:
             return res
 

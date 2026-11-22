@@ -2,7 +2,8 @@
 
 // Integrasi PoS (Odoo 17) dengan modul stock_no_negative.
 //
-//  - Produk ber-kontrol stok (storable + negative stock tidak diizinkan) yang
+//  - Setting dibaca dari lokasi sumber PoS (stock.location "Allow Negative
+//    Stock"). Jika TIDAK dicentang, produk storable ber-kontrol stok yang
 //    stoknya habis TETAP TAMPIL di product card, tapi pudar + label
 //    "Stok Habis" dan tidak bisa ditambahkan ke order.
 //  - Penambahan produk (klik card, scan barcode, popup pilih barcode) ditolak

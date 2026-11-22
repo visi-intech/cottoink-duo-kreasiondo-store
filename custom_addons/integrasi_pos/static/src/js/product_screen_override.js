@@ -259,6 +259,36 @@ patch(ProductScreen.prototype, {
         return uniqueProducts;
     },
 
+    /**
+     * Tambah produk hasil scan ke order.
+     * Stok dicek dulu ke server (pos_stock_no_negative.js): kalau stok habis /
+     * tidak cukup, popup "Stok Tidak Cukup" tampil dan produk TIDAK ditambahkan.
+     * Order refund tidak diblokir.
+     */
+    async _addScannedProduct(product, quantity) {
+        const order = this.currentOrder;
+        if (
+            !order._isRefundOrder() &&
+            this.pos.vitCheckStock &&
+            !(await this.pos.vitCheckStock(product, quantity, order))
+        ) {
+            return;
+        }
+
+        // Produk timbangan selalu buat orderline baru
+        if (product.to_weight) {
+            await order.add_product(product, { quantity });
+            return;
+        }
+        // Produk non-timbangan: tambah qty ke line yang sudah ada
+        const existingLine = order.get_orderlines().find((line) => line.product.id === product.id);
+        if (existingLine) {
+            existingLine.set_quantity(existingLine.get_quantity() + quantity);
+        } else {
+            await order.add_product(product, { quantity });
+        }
+    },
+
     async _barcodeProductAction(parsedBarcode) {
         const barcode = parsedBarcode?.code || parsedBarcode?.base_code || "";
         const config = this.pos.config;
@@ -270,21 +300,7 @@ patch(ProductScreen.prototype, {
         if (matchedProducts.length > 1) {
             const result = await this._showProductChoicePopup(matchedProducts, barcode, config);
             if (result) {
-                // MODIFIED: Produk timbangan selalu buat orderline baru
-                if (result.product.to_weight) {
-                    console.log("⚖️ Produk timbangan - membuat orderline baru");
-                    this.currentOrder.add_product(result.product, { quantity: result.quantity });
-                } else {
-                    // Produk non-timbangan: cek existing line
-                    const existingLine = this.currentOrder
-                        .get_orderlines()
-                        .find(line => line.product.id === result.product.id);
-                    if (existingLine) {
-                        existingLine.set_quantity(existingLine.get_quantity() + result.quantity);
-                    } else {
-                        this.currentOrder.add_product(result.product, { quantity: result.quantity });
-                    }
-                }
+                await this._addScannedProduct(result.product, result.quantity);
             }
             return;
         }
@@ -298,23 +314,7 @@ patch(ProductScreen.prototype, {
             }
 
             console.log("✅ Product matched:", product.display_name, "Qty:", quantity);
-
-            // MODIFIED: Produk timbangan selalu buat orderline baru
-            if (product.to_weight) {
-                console.log("⚖️ Produk timbangan - membuat orderline baru");
-                this.currentOrder.add_product(product, { quantity });
-            } else {
-                // Produk non-timbangan: cek existing line
-                const existingLine = this.currentOrder
-                    .get_orderlines()
-                    .find(line => line.product.id === product.id);
-                
-                if (existingLine) {
-                    existingLine.set_quantity(existingLine.get_quantity() + quantity);
-                } else {
-                    this.currentOrder.add_product(product, { quantity });
-                }
-            }
+            await this._addScannedProduct(product, quantity);
             return;
         }
 
@@ -329,24 +329,7 @@ patch(ProductScreen.prototype, {
             return;
         }
 
-        const { product, quantity } = fallback;
-
-        // MODIFIED: Produk timbangan selalu buat orderline baru
-        if (product.to_weight) {
-            console.log("⚖️ Produk timbangan - membuat orderline baru");
-            this.currentOrder.add_product(product, { quantity });
-        } else {
-            // Produk non-timbangan: cek existing line
-            const existingLine = this.currentOrder
-                .get_orderlines()
-                .find(line => line.product.id === product.id);
-            
-            if (existingLine) {
-                existingLine.set_quantity(existingLine.get_quantity() + quantity);
-            } else {
-                this.currentOrder.add_product(product, { quantity });
-            }
-        }
+        await this._addScannedProduct(fallback.product, fallback.quantity);
     },
 
     async _getFallbackProduct(barcode, config) {
