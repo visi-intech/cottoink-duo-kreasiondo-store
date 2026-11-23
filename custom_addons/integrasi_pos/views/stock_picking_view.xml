@@ -7,10 +7,14 @@
       <field name="model">stock.picking</field>
       <field name="inherit_id" ref="stock.view_picking_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//field[@name='origin']" position="after">
+        <!-- Integrated, Updated, Transaction ID: tab Additional Info, group Other Information,
+             setelah Procurement Group -->
+        <xpath expr="//page[@name='extra']//group[@name='other_infos']/field[@name='group_id']" position="after">
             <field name="is_integrated"/>
             <field name="is_updated"/>
             <field name="vit_trxid"/>
+        </xpath>
+        <xpath expr="//field[@name='origin']" position="after">
             <field name="target_location" readonly="state in ['assigned', 'done']"/>
             <field name="targets"/>
         </xpath>
