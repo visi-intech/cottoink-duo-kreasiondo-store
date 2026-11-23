@@ -16,11 +16,9 @@ class StockPicking(models.Model):
 
     vit_ts_transfer_type_id = fields.Many2one('vit.ts.transfer.type', string='Transfer Type',
                                                help='Jenis transaksi untuk TS Out.')
-    vit_ts_transfer_out_id = fields.Many2one('stock.picking', string='TS Out Reference',
-                                              domain="[('picking_type_id.name', '=', 'TS Out')]",
-                                              index=True, copy=False,
-                                              help='Dokumen TS Out yang menjadi dasar TS In ini (opsional). '
-                                                   'Terisi otomatis untuk TS In yang dibuat dari TS Out.')
+    vit_ts_transfer_out_ref = fields.Char(string='TS Out Reference', index=True, copy=False,
+                                           help='Nomor dokumen TS Out yang menjadi dasar TS In ini. '
+                                                'Diisi otomatis (dari sync MC atau saat TS In dibuat otomatis).')
     vit_ts_warehouse_id = fields.Many2one('stock.warehouse', string='Source Warehouse',
                                            index=True, copy=False,
                                            help='Gudang asal. Pada TS Out, memilih gudang ini '
@@ -33,7 +31,6 @@ class StockPicking(models.Model):
                                       help='Technical: dokumen ini memakai operation type TS In.')
     vit_ts_is_ts_out = fields.Boolean(string='Is TS Out', compute='_compute_vit_ts_is_ts_out',
                                        help='Technical: dokumen ini memakai operation type TS Out.')
-    vit_ts_in_ids = fields.One2many('stock.picking', 'vit_ts_transfer_out_id', string='TS In')
     vit_ts_in_count = fields.Integer(string='TS In', compute='_compute_vit_ts_in_count')
 
     @staticmethod
@@ -93,10 +90,16 @@ class StockPicking(models.Model):
             warehouse = self.vit_ts_warehouse_dest_id
             self.location_dest_id = warehouse.location_transit or warehouse.lot_stock_id
 
-    @api.depends('vit_ts_in_ids.state')
+    def _vit_ts_get_ts_in(self):
+        """TS In (non-cancel) yang merujuk ke nomor TS Out ini lewat field char."""
+        self.ensure_one()
+        if not self.name:
+            return self.browse()
+        return self.search([('vit_ts_transfer_out_ref', '=', self.name), ('state', '!=', 'cancel')])
+
     def _compute_vit_ts_in_count(self):
         for picking in self:
-            picking.vit_ts_in_count = len(picking.vit_ts_in_ids.filtered(lambda p: p.state != 'cancel'))
+            picking.vit_ts_in_count = len(picking._vit_ts_get_ts_in()) if picking.vit_ts_is_ts_out else 0
 
     # ------------------------------------------------------------------
     # TS Out -> TS In
@@ -145,7 +148,7 @@ class StockPicking(models.Model):
             'origin': self.name,
             'company_id': self.company_id.id,
             'vit_ts_transfer_type_id': self.vit_ts_transfer_type_id.id,
-            'vit_ts_transfer_out_id': self.id,
+            'vit_ts_transfer_out_ref': self.name,
             'vit_ts_warehouse_id': self.vit_ts_warehouse_id.id,
             'vit_ts_warehouse_dest_id': self.vit_ts_warehouse_dest_id.id,
             'move_ids_without_package': move_vals,
@@ -159,7 +162,7 @@ class StockPicking(models.Model):
         if not self.vit_ts_is_ts_out or self.state != 'done':
             return self.browse()
         # idempotent: satu TS Out cuma dibuatkan satu TS In
-        if self.vit_ts_in_ids.filtered(lambda p: p.state != 'cancel'):
+        if self._vit_ts_get_ts_in():
             return self.browse()
 
         move_vals = []
@@ -230,7 +233,7 @@ class StockPicking(models.Model):
             'name': _('TS In'),
             'res_model': 'stock.picking',
             'view_mode': 'tree,form',
-            'domain': [('vit_ts_transfer_out_id', '=', self.id)],
+            'domain': [('vit_ts_transfer_out_ref', '=', self.name)],
             'context': {'create': False},
         }
 

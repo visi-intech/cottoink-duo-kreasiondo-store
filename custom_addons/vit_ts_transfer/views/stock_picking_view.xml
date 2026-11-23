@@ -38,8 +38,7 @@
         </xpath>
         <xpath expr="//field[@name='origin']" position="after">
             <field name="vit_ts_is_ts_in" invisible="1"/>
-            <field name="vit_ts_transfer_out_id"
-                   options="{'no_create': True, 'no_quick_create': True}"
+            <field name="vit_ts_transfer_out_ref"
                    invisible="not vit_ts_is_ts_in"
                    readonly="state in ['done', 'cancel']"/>
             <field name="vit_ts_transfer_type_id"
