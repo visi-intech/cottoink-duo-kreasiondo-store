@@ -19,10 +19,9 @@ class StockPicking(models.Model):
     vit_ts_transfer_out_ref = fields.Char(string='TS Out Reference', index=True, copy=False,
                                            help='Nomor dokumen TS Out yang menjadi dasar TS In ini. '
                                                 'Diisi otomatis (dari sync MC atau saat TS In dibuat otomatis).')
-    vit_ts_warehouse_id = fields.Many2one('stock.warehouse', string='Source Warehouse',
-                                           index=True, copy=False,
-                                           help='Gudang asal. Pada TS Out, memilih gudang ini '
-                                                'mengisi Source Location dengan stock location gudang.')
+    vit_ts_source_warehouse = fields.Char(string='Source Warehouse', index=True, copy=False,
+                                          help='Nama gudang asal (teks biasa, bukan relasi ke data gudang). '
+                                               'Diisi otomatis (dari sync MC atau saat TS In dibuat otomatis).')
     vit_ts_warehouse_dest_id = fields.Many2one('stock.warehouse', string='Destination Warehouse',
                                                 index=True, copy=False,
                                                 help='Gudang tujuan akhir. Pada TS Out dipakai untuk menentukan '
@@ -75,12 +74,6 @@ class StockPicking(models.Model):
             if types:
                 res['picking_type_id'] = types[0].id
         return res
-
-    @api.onchange('vit_ts_warehouse_id')
-    def _onchange_vit_ts_warehouse_id(self):
-        """Source Location TS Out diisi stock location gudang asal."""
-        if self.vit_ts_warehouse_id and self.vit_ts_is_ts_out:
-            self.location_id = self.vit_ts_warehouse_id.lot_stock_id
 
     @api.onchange('vit_ts_warehouse_dest_id')
     def _onchange_vit_ts_warehouse_dest_id(self):
@@ -149,7 +142,7 @@ class StockPicking(models.Model):
             'company_id': self.company_id.id,
             'vit_ts_transfer_type_id': self.vit_ts_transfer_type_id.id,
             'vit_ts_transfer_out_ref': self.name,
-            'vit_ts_warehouse_id': self.vit_ts_warehouse_id.id,
+            'vit_ts_source_warehouse': self.vit_ts_source_warehouse or self.location_id.warehouse_id.name,
             'vit_ts_warehouse_dest_id': self.vit_ts_warehouse_dest_id.id,
             'move_ids_without_package': move_vals,
         }
