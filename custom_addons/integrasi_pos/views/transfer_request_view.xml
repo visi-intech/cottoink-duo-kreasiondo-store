@@ -83,12 +83,7 @@
       <field name="view_mode">tree,form</field>
     </record>
 
-    <!-- Child Menu -->
-    <menuitem
-      id="transfer_request_menu"
-      name="Transfer Request"
-      action="action_transfer_request"
-      parent="stock.menu_stock_transfers"
-      sequence="3"/>
+    <!-- Menu "Transfer Request" di Inventory > Operations sengaja dihapus.
+         Model, view, dan action tetap ada (masih dipakai lewat tombol / integrasi). -->
   </data>
 </odoo>

@@ -19,8 +19,8 @@ class StockPicking(models.Model):
     vit_ts_transfer_out_id = fields.Many2one('stock.picking', string='TS Out Reference',
                                               domain="[('picking_type_id.name', '=', 'TS Out')]",
                                               index=True, copy=False,
-                                              help='Dokumen TS Out yang menjadi dasar TS In ini. '
-                                                   'Wajib diisi pada dokumen TS In.')
+                                              help='Dokumen TS Out yang menjadi dasar TS In ini (opsional). '
+                                                   'Terisi otomatis untuk TS In yang dibuat dari TS Out.')
     vit_ts_warehouse_id = fields.Many2one('stock.warehouse', string='Source Warehouse',
                                            index=True, copy=False,
                                            help='Gudang asal. Pada TS Out, memilih gudang ini '

@@ -41,7 +41,6 @@
             <field name="vit_ts_transfer_out_id"
                    options="{'no_create': True, 'no_quick_create': True}"
                    invisible="not vit_ts_is_ts_in"
-                   required="vit_ts_is_ts_in"
                    readonly="state in ['done', 'cancel']"/>
             <field name="vit_ts_transfer_type_id"
                    options="{'no_quick_create': True}"
