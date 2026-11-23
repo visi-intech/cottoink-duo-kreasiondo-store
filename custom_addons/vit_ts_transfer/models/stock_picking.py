@@ -198,7 +198,29 @@ class StockPicking(models.Model):
                 continue
             if ts_in:
                 picking.message_post(body=_("TS In %s dibuat otomatis setelah TS Out ini Done.", ts_in.name))
+                ts_in._vit_ts_auto_ready()
         return res
+
+    def _vit_ts_auto_ready(self):
+        """TS In yang baru terbentuk langsung dikonfirmasi + di-reserve supaya statusnya
+        Ready (bukan Draft). Dipisah dari pembuatan TS In: kalau gagal, TS In tetap ada
+        (Draft) dan error-nya dicatat di chatter, tidak membatalkan TS Out."""
+        self.ensure_one()
+        try:
+            with self.env.cr.savepoint():
+                if self.state == 'draft':
+                    self.action_confirm()
+                if self.state == 'confirmed':
+                    self.action_assign()
+        except Exception as exc:  # noqa: BLE001 - dicatat di log + chatter
+            _logger.exception("Gagal membuat TS In %s jadi Ready", self.name)
+            self.message_post(body=_(
+                "TS In gagal otomatis jadi Ready: %s. Klik Confirm / Check Availability manual.", str(exc)))
+            return
+        if self.state != 'assigned':
+            self.message_post(body=_(
+                "TS In sudah dikonfirmasi tapi belum Ready (stok di lokasi asal belum tersedia "
+                "penuh). Status saat ini: %s.", dict(self._fields['state'].selection).get(self.state)))
 
     def vit_ts_action_view_ts_in(self):
         self.ensure_one()

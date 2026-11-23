@@ -40,14 +40,14 @@
       name="TS In"
       action="action_picking_ts_in"
       parent="menu_transfer_root"
-      sequence="2"/>
+      sequence="3"/>
 
     <menuitem
       id="menu_transfer_ts_out"
       name="TS Out"
       action="action_picking_ts_out"
       parent="menu_transfer_root"
-      sequence="3"/>
+      sequence="2"/>
 
     <!-- Master data Transfer Type -->
     <record id="action_vit_ts_transfer_type" model="ir.actions.act_window">
