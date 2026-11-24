@@ -1347,6 +1347,14 @@ class DataTransaksiMCtoSS:
                 if existing_ts_in:
                     existing_ts_in_dict[record['id']] = existing_ts_in[0]['id']
 
+            try:
+                has_ts_out_ref_field = bool(self.target_client.call_odoo('object', 'execute_kw', self.target_client.db,
+                                                                         self.target_client.uid, self.target_client.password,
+                                                                         'stock.picking', 'fields_get',
+                                                                         [['vit_ts_transfer_out_ref']], {'attributes': ['type']}))
+            except Exception:
+                has_ts_out_ref_field = False
+
             def process_ts_in_record(record):
                 if record['id'] in existing_ts_in_dict:
                     return
@@ -1417,6 +1425,11 @@ class DataTransaksiMCtoSS:
                     'picking_type_id': int(picking_type_id),
                     'move_ids_without_package': ts_in_inventory_line_ids,
                 }
+
+                # nomor TS Out asal (MC mengisi origin TS In dengan nama TS Out). Hanya diisi kalau
+                # modul vit_ts_transfer terpasang di store, supaya sync tidak error di store yang belum punya.
+                if has_ts_out_ref_field:
+                    ts_in_transfer_data['vit_ts_transfer_out_ref'] = record.get('origin', False)
 
                 print(ts_in_transfer_data)
 
