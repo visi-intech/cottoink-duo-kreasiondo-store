@@ -227,12 +227,18 @@ async function sendToPoleDisplay(line1, line2) {
 }
 
 // ========== API HELPER FUNCTIONS ==========
+// Gabung base URL + path tanpa double slash (base URL dari config / vit_config_url
+// kadang diakhiri "/", menghasilkan "...:8069//api/...").
+function joinURL(base, path) {
+    return `${String(base || "").replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
+}
+
 async function fetchMasterServerURL() {
     try {
         const config = await loadConfig();
         console.log("🔍 Fetching Master Server URL for MC...");
         
-        const apiURL = `${config.api.baseURL}/api/master_server/?vit_config_server_name=${config.api.serverName}`;
+        const apiURL = joinURL(config.api.baseURL, `api/master_server/?vit_config_server_name=${config.api.serverName}`);
         
         const response = await fetch(apiURL, {
             method: 'GET',
@@ -269,7 +275,7 @@ async function checkCouponIsUsed(baseURL, couponCode) {
         const config = await loadConfig();
         console.log(`🔍 Checking coupon is_used status: ${couponCode}`);
         
-        const apiURL = `${baseURL}/api/master_coupon/?code=${encodeURIComponent(couponCode)}`;
+        const apiURL = joinURL(baseURL, `api/master_coupon/?code=${encodeURIComponent(couponCode)}`);
         
         const response = await fetch(apiURL, {
             method: 'GET',
@@ -331,9 +337,11 @@ async function updateCouponIsUsed(baseURL, couponCode, isUsed = true) {
         const config = await loadConfig();
         console.log(`📝 Updating coupon is_used: code=${couponCode}, is_used=${isUsed}`);
         
-        const apiURL = `${baseURL}/api/master_coupon`;
+        const apiURL = joinURL(baseURL, "api/master_coupon");
         
         const response = await fetch(apiURL, {
+            // PATCH: MC menangani preflight OPTIONS /api/master_coupon sendiri
+            // (route type='http' -> cors_response, Allow-Methods termasuk PATCH).
             method: 'PATCH',
             headers: {
                 'Authorization': config.api.authorization,
