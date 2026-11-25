@@ -259,11 +259,9 @@ class PosSession(models.Model):
         
         # Check if each model exists before adding
         model_checks = [
-            'loyalty.program',
-            'loyalty.program.schedule', 
+            # loyalty.program/reward/rule sudah dimuat oleh pos_loyalty
+            'loyalty.program.schedule',
             'loyalty.member',
-            'loyalty.reward',
-            'loyalty.rule',
             'res.partner',
             'res.config.settings',
             'res.company',
@@ -715,150 +713,10 @@ class PosSession(models.Model):
     def _pos_ui_res_partner(self, params):
         return self._get_pos_ui_res_partner(params)
 
-    def _loader_params_loyalty_program(self):
-        return {
-            'search_params': {
-                'domain': [('active', '=', True)],
-                'fields': [
-                    'name', 'program_type', 'active', 'trigger', 'rule_ids',
-                    'is_nominative', 'limit_usage', 'total_order_count',
-                    'max_usage', 'pricelist_ids', 'date_from', 'date_to',
-                ],
-            }
-        }
-
-    def _get_pos_ui_loyalty_program(self, params):
-        try:
-            if 'loyalty.program' not in self.env:
-                _logger.warning("⚠️ Model loyalty.program not found")
-                return []
-                
-            programs = self.env['loyalty.program'].search_read(
-                params['search_params'].get('domain', []),
-                params['search_params']['fields'],
-                limit=100
-            )
-            
-            for program in programs:
-                program['active'] = True
-                
-                # Handle pricelist_ids
-                if program.get('pricelist_ids') and isinstance(program['pricelist_ids'], list):
-                    program['pricelist_ids'] = [int(pid) for pid in program['pricelist_ids'] if str(pid).isdigit()]
-                
-                # Handle rule_ids
-                if program.get('rule_ids') and isinstance(program['rule_ids'], list):
-                    program['rule_ids'] = [int(rid) for rid in program['rule_ids'] if str(rid).isdigit()]
-                    
-            _logger.info(f"✅ Loaded {len(programs)} loyalty.program records")
-            return programs
-        except Exception as e:
-            _logger.error(f"❌ Error loading loyalty.program: {e}")
-            return []
-
-    def _pos_ui_loyalty_program(self, params):
-        return self._get_pos_ui_loyalty_program(params)
-    
-    def _loader_params_loyalty_reward(self):
-        return {
-            'search_params': {
-                'domain': [('program_id.active', '=', True)],
-                'fields': ['name', 'reward_type', 'discount', 'program_id', 'reward_product_ids', 'discount_line_product_id'],
-            }
-        }
-
-    def _get_pos_ui_loyalty_reward(self, params):
-        try:
-            if 'loyalty.reward' not in self.env:
-                _logger.warning("⚠️ Model loyalty.reward not found")
-                return []
-            
-            records = self.env['loyalty.reward'].search_read(
-                params['search_params'].get('domain', []),
-                params['search_params']['fields'],
-                limit=500
-            )
-
-            for rec in records:
-                # Process program_id
-                if rec.get('program_id'):
-                    if isinstance(rec['program_id'], int):
-                        program = self.env['loyalty.program'].browse(rec['program_id'])
-                        rec['program_id'] = [rec['program_id'], program.name if program.exists() else '']
-                    elif isinstance(rec['program_id'], list) and len(rec['program_id']) >= 2:
-                        rec['program_id'] = [int(rec['program_id'][0]), str(rec['program_id'][1])]
-
-                # Process discount_line_product_id
-                if rec.get('discount_line_product_id'):
-                    if isinstance(rec['discount_line_product_id'], int):
-                        product = self.env['product.product'].browse(rec['discount_line_product_id'])
-                        if product.exists():
-                            rec['discount_line_product_id'] = [product.id, product.display_name]
-                            if not product.available_in_pos:
-                                _logger.warning(
-                                    f"⚠️ Discount product '{product.display_name}' "
-                                    f"(ID {product.id}) not available in POS"
-                                )
-                        else:
-                            rec['discount_line_product_id'] = False
-                    elif isinstance(rec['discount_line_product_id'], list) and len(rec['discount_line_product_id']) >= 2:
-                        rec['discount_line_product_id'] = [int(rec['discount_line_product_id'][0]), str(rec['discount_line_product_id'][1])]
-                
-                # Process reward_product_ids
-                if rec.get('reward_product_ids') and isinstance(rec['reward_product_ids'], list):
-                    rec['reward_product_ids'] = [int(pid) for pid in rec['reward_product_ids'] if str(pid).isdigit()]
-                    
-            _logger.info(f"✅ Loaded {len(records)} loyalty.reward records")
-            return records
-        except Exception as e:
-            _logger.error(f"❌ Error loading loyalty.reward: {e}")
-            return []
-
-    def _pos_ui_loyalty_reward(self, params):
-        return self._get_pos_ui_loyalty_reward(params)
-
-    def _loader_params_loyalty_rule(self):
-        return {
-            'search_params': {
-                'domain': [('program_id.active', '=', True)],
-                'fields': ['name', 'program_id', 'reward_point_amount', 'reward_point_mode', 
-                          'minimum_qty', 'minimum_amount', 'product_ids', 'product_domain'],
-            }
-        }
-
-    def _get_pos_ui_loyalty_rule(self, params):
-        try:
-            if 'loyalty.rule' not in self.env:
-                _logger.warning("⚠️ Model loyalty.rule not found")
-                return []
-                
-            records = self.env['loyalty.rule'].search_read(
-                params['search_params'].get('domain', []),
-                params['search_params']['fields'],
-                limit=500
-            )
-            
-            for rec in records:
-                # Process program_id
-                if rec.get('program_id'):
-                    if isinstance(rec['program_id'], int):
-                        program = self.env['loyalty.program'].browse(rec['program_id'])
-                        rec['program_id'] = [rec['program_id'], program.name if program.exists() else '']
-                    elif isinstance(rec['program_id'], list) and len(rec['program_id']) >= 2:
-                        rec['program_id'] = [int(rec['program_id'][0]), str(rec['program_id'][1])]
-                
-                # Process product_ids
-                if rec.get('product_ids') and isinstance(rec['product_ids'], list):
-                    rec['product_ids'] = [int(pid) for pid in rec['product_ids'] if str(pid).isdigit()]
-                    
-            _logger.info(f"✅ Loaded {len(records)} loyalty.rule records")
-            return records
-        except Exception as e:
-            _logger.error(f"❌ Error loading loyalty.rule: {e}")
-            return []
-
-    def _pos_ui_loyalty_rule(self, params):
-        return self._get_pos_ui_loyalty_rule(params)
+    # loyalty.program / loyalty.reward / loyalty.rule SENGAJA tidak di-override di sini.
+    # Loader pos_loyalty yang dipakai: field lengkap (required_points, description,
+    # discount_mode, valid_product_ids, dst.), hanya program milik POS ini, tanpa limit.
+    # Override lama (tanpa super, limit 100/500) membuat reward coupon tidak bisa diklaim.
 
     def _loader_params_loyalty_member(self):
         return {
