@@ -1,4 +1,5 @@
 import logging
+import re
 
 from odoo import models, fields, api, _
 from odoo.exceptions import AccessError, UserError
@@ -57,6 +58,58 @@ class StockPicking(models.Model):
     def _compute_vit_ts_is_ts_out(self):
         for picking in self:
             picking.vit_ts_is_ts_out = self._vit_ts_type_matches(picking.picking_type_id, TS_OUT_NAME)
+
+    # ------------------------------------------------------------------
+    # Penomoran: TSOT/<kode WH>/<tahun>/00001 dan TSIN/<kode WH>/<tahun>/00001.
+    # Di Store kode WH diambil dari Destination Warehouse. Dokumen hasil sync dari MC membawa
+    # nomor MC (name sudah terisi) dan tidak diberi nomor baru di sini, supaya nomor Store = MC.
+    # ------------------------------------------------------------------
+    @api.model
+    def _vit_ts_numbering_warehouse(self, vals, picking_type):
+        warehouse = self.env['stock.warehouse']
+        if vals.get('vit_ts_warehouse_dest_id'):
+            warehouse = warehouse.browse(vals['vit_ts_warehouse_dest_id'])
+        if not warehouse and vals.get('location_dest_id'):
+            warehouse = self.env['stock.location'].browse(vals['location_dest_id']).warehouse_id
+        return warehouse or picking_type.warehouse_id
+
+    @api.model
+    def _vit_ts_next_name(self, prefix, code, batch_counter):
+        """Nomor berikutnya = nomor terbesar yang sudah dipakai prefix yang sama + 1 (termasuk
+        dokumen hasil sync dari MC). Advisory lock menyerialkan pembuatan nomor."""
+        year = fields.Date.context_today(self).year
+        base = '%s/%s/%s/' % (prefix, code, year)
+        if base not in batch_counter:
+            self.env.cr.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (base,))
+            like = base.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+            pattern = '^%s[0-9]+$' % re.escape(base)
+            self.env.cr.execute(
+                "SELECT max(substring(name from '([0-9]+)$')::bigint) FROM stock_picking "
+                "WHERE name LIKE %s AND name ~ %s", (like, pattern))
+            batch_counter[base] = self.env.cr.fetchone()[0] or 0
+        batch_counter[base] += 1
+        return '%s%05d' % (base, batch_counter[base])
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        batch_counter = {}
+        for vals in vals_list:
+            if vals.get('name') not in (None, False, '', '/'):
+                continue
+            type_id = vals.get('picking_type_id') or self.default_get(['picking_type_id']).get('picking_type_id')
+            if not type_id:
+                continue
+            picking_type = self.env['stock.picking.type'].browse(type_id)
+            if self._vit_ts_type_matches(picking_type, TS_OUT_NAME):
+                prefix = 'TSOT'
+            elif self._vit_ts_type_matches(picking_type, TS_IN_NAME):
+                prefix = 'TSIN'
+            else:
+                continue
+            code = (self._vit_ts_numbering_warehouse(vals, picking_type).code or '').strip()
+            if code:  # tanpa kode WH: biarkan penomoran bawaan Odoo
+                vals['name'] = self._vit_ts_next_name(prefix, code, batch_counter)
+        return super().create(vals_list)
 
     @api.model
     def default_get(self, fields_list):

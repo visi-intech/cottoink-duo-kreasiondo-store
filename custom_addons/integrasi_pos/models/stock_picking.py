@@ -56,7 +56,7 @@ class StockPicking(models.Model):
         return super(StockPicking, self).create(vals)
 
     # -------------------------------------------------------------------------
-    # VALIDASI TS IN: Quantity tidak boleh kurang dari Demand
+    # VALIDASI TS IN: Quantity harus sama dengan Demand (demand = qty TS Out dari MC)
     # -------------------------------------------------------------------------
     def _is_ts_in(self):
         """Operation type TS In dikenali dari nama picking type.
@@ -66,7 +66,8 @@ class StockPicking(models.Model):
         return name == 'TSIN'
 
     def _check_ts_in_quantity(self):
-        """Blokir validate TS In jika ada Quantity < Demand."""
+        """Blokir validate TS In jika Quantity tidak sama dengan Demand (kurang maupun lebih).
+        Demand TS In = qty TS Out di MC, jadi TS In tidak boleh diproses melebihi / kurang dari TS Out."""
         for picking in self:
             if not picking._is_ts_in():
                 continue
@@ -74,9 +75,9 @@ class StockPicking(models.Model):
             kurang = []
             for move in picking.move_ids.filtered(lambda m: m.state != 'cancel'):
                 rounding = move.product_uom.rounding
-                if float_compare(move.quantity, move.product_uom_qty, precision_rounding=rounding) < 0:
+                if float_compare(move.quantity, move.product_uom_qty, precision_rounding=rounding) != 0:
                     kurang.append(_(
-                        "- [%(code)s] %(name)s: Quantity %(qty)s dari Demand %(demand)s %(uom)s",
+                        "- [%(code)s] %(name)s: Quantity %(qty)s, Demand (qty TS Out) %(demand)s %(uom)s",
                         code=move.product_id.default_code or '-',
                         name=move.product_id.name,
                         qty=move.quantity,
@@ -87,15 +88,15 @@ class StockPicking(models.Model):
             if kurang:
                 raise UserError(_(
                     "Tidak dapat memvalidasi %(doc)s.\n\n"
-                    "Quantity yang diterima kurang dari Demand untuk produk berikut:\n"
+                    "Quantity TS In harus sama dengan Demand (qty TS Out) untuk produk berikut:\n"
                     "%(lines)s\n\n"
-                    "Pastikan seluruh Quantity sudah sesuai dengan Demand sebelum Validate.",
+                    "Quantity tidak boleh kurang maupun lebih dari Demand sebelum Validate.",
                     doc=picking.name,
                     lines="\n".join(kurang),
                 ))
 
     def button_validate(self):
-        # Blokir TS In jika Quantity < Demand
+        # Blokir TS In jika Quantity tidak sama dengan Demand
         self._check_ts_in_quantity()
 
         # Internal Transfers: source & destination tidak boleh sama
