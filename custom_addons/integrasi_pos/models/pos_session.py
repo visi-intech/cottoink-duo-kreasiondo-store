@@ -376,33 +376,19 @@ class PosSession(models.Model):
         return self._get_pos_ui_res_company(params)
     
     def _loader_params_hr_employee(self):
-        """Load HR employees for salesperson selection"""
-        return {
-            'search_params': {
-                'domain': [],
-                'fields': ['id', 'name', 'work_email', 'mobile_phone', 'job_title', 'pin', 'image_128'],
-            }
-        }
+        """Pakai loader pos_hr (domain basic/advanced employee + field login),
+        hanya ditambah field ekstra untuk tampilan salesperson.
 
-    def _get_pos_ui_hr_employee(self, params):
-        try:
-            if 'hr.employee' not in self.env:
-                _logger.warning("⚠️ Model hr.employee not found")
-                return []
-                
-            records = self.env['hr.employee'].search_read(
-                params['search_params']['domain'],
-                params['search_params']['fields'],
-                limit=500
-            )
-            _logger.info(f"✅ Loaded {len(records)} hr.employee records")
-            return records
-        except Exception as e:
-            _logger.error(f"❌ Error loading hr.employee: {e}")
-            return []
-
-    def _pos_ui_hr_employee(self, params):
-        return self._get_pos_ui_hr_employee(params)
+        JANGAN ganti total _get_pos_ui_hr_employee: versi pos_hr yang mengisi
+        'role' (manager/cashier), 'user_id', 'barcode' dan 'pin' (hash).
+        Tanpa 'role', kasir Manager pun tidak melihat Close Session,
+        Cash In/Out dan Backend di menu PoS."""
+        params = super()._loader_params_hr_employee()
+        fields = params.setdefault('search_params', {}).setdefault('fields', [])
+        for field in ('work_email', 'mobile_phone', 'job_title', 'image_128'):
+            if field not in fields:
+                fields.append(field)
+        return params
 
     def _loader_params_hr_employee_config_settings(self):
         return {
