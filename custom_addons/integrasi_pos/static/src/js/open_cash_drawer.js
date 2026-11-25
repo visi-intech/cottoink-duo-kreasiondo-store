@@ -99,7 +99,7 @@ async function loadConfig() {
             CONFIG = {
                 api: {
                     baseURL: "http://116.254.101.240:8069/",
-                    authorization: "dd4ae5119307bd63fd3d888201ad28b61a442f1d",
+                    authorization: "1d4f5cd1f1eaf7d7e7bc6e080462fadc68d2a6fd72edf919b696afc45eb9bcb0",
                     timeout: 10000,
                     serverName: "MC"
                 },
@@ -120,7 +120,7 @@ async function loadConfig() {
         CONFIG = {
             api: {
                 baseURL: "http://116.254.101.240:8069/",
-                authorization: "dd4ae5119307bd63fd3d888201ad28b61a442f1d",
+                authorization: "1d4f5cd1f1eaf7d7e7bc6e080462fadc68d2a6fd72edf919b696afc45eb9bcb0",
                 timeout: 10000,
                 serverName: "MC"
             },
