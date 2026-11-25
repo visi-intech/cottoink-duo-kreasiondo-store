@@ -67,24 +67,11 @@ patch(Order.prototype, {
                     // ✅ Order masih pending, izinkan re-claim reward
                     console.log("✅ Order masih pending, izinkan re-claim reward dari coupon");
                     
-                    // Refresh claimable rewards untuk coupon ini
+                    // Refresh claimable rewards untuk coupon ini, lalu lanjut ke blok
+                    // AUTO-APPLY di bawah (satu tempat untuk apply + pesan ke kasir)
+                    coupon = existingCoupon;
                     claimableRewards = this.getClaimableRewards(existingCoupon.id);
-                    
-                    // Auto-apply jika hanya ada 1 reward
-                    if (claimableRewards && claimableRewards.length === 1) {
-                        const { reward, coupon_id } = claimableRewards[0];
-                        if (
-                            reward.reward_type !== "product" ||
-                            !reward.multi_product
-                        ) {
-                            console.log("🎁 Auto-applying reward:", reward.description);
-                            this._applyReward(reward, coupon_id);
-                            this._updateRewards();
-                        }
-                    }
-                    
-                    return true;
-                    
+
                 } else {
                     // ❌ Order sudah finalized/paid, tolak
                     console.warn("❌ Order sudah finalized, tolak re-scan coupon");
@@ -149,29 +136,53 @@ patch(Order.prototype, {
             }
         }
         
-        // ========== AUTO-APPLY REWARD ==========
-        if (claimableRewards && claimableRewards.length === 1) {
-            const { reward, coupon_id } = claimableRewards[0];
-            if (
-                reward.reward_type !== "product" ||
-                !reward.multi_product
-            ) {
-                console.log("🎁 Auto-applying single reward:", reward.description);
-                this._applyReward(reward, coupon_id);
-                this._updateRewards();
-            }
-        }
-        
+        console.log("🎯 Claimable rewards:", (claimableRewards || []).map((r) => ({
+            program: r.reward.program_id?.name,
+            reward: r.reward.description,
+            type: r.reward.reward_type,
+            required_points: r.reward.required_points,
+        })), {
+            coupon_points: coupon ? this._getRealCouponPoints(coupon.id) : undefined,
+            order_total: this.get_total_with_tax(),
+            orderlines: this.orderlines.length,
+        });
+
         // ========== GIFT CARD BALANCE INFO ==========
+        // Order masih kosong: tampilkan saldo, reward akan otomatis diterapkan
+        // oleh _updateRewards saat produk ditambahkan.
         if (!rule && this.orderlines.length === 0 && coupon) {
             return _t(
-                "Gift Card: %s\nBalance: %s",
+                "Kupon %s aktif (saldo/poin: %s). Tambahkan produk, reward akan diterapkan otomatis.",
                 code,
-                this.env.utils.formatCurrency(coupon.balance)
+                coupon.balance
             );
         }
-        
-        return true;
+
+        // ========== AUTO-APPLY REWARD ==========
+        if (!claimableRewards || claimableRewards.length === 0) {
+            return _t(
+                "Kupon %s aktif, tetapi belum ada reward yang memenuhi syarat " +
+                "(cek minimal belanja / produk syarat program, atau reward sudah diterapkan).",
+                code
+            );
+        }
+
+        if (claimableRewards.length === 1) {
+            const { reward, coupon_id } = claimableRewards[0];
+            if (reward.reward_type !== "product" || !reward.multi_product) {
+                console.log("🎁 Auto-applying single reward:", reward.description);
+                const applyResult = this._applyReward(reward, coupon_id);
+                if (applyResult !== true) {
+                    // _applyReward mengembalikan string pesan jika gagal
+                    return applyResult;
+                }
+                this._updateRewards();
+                return true;
+            }
+        }
+
+        // Lebih dari 1 reward atau reward multi-produk: kasir harus memilih sendiri
+        return _t("Kupon %s aktif. Klik tombol Reward untuk memilih reward.", code);
     },
 
     /**
