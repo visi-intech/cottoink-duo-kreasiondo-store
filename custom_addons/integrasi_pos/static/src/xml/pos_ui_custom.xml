@@ -55,8 +55,7 @@
                             partner="partner"
                             actionName="constructor.numpadActionName"
                             actionType="'payment'"
-                            onClickMore.bind="displayAllControlPopup"
-                            class="'actionpad-widget'" />
+                            onClickMore.bind="displayAllControlPopup" />
                         <Numpad 
                             buttons="getNumpadButtons()" 
                             onClick.bind="onNumpadClick"
@@ -82,8 +81,7 @@
                 </div>
                 
                 <!-- ORDER WIDGET - Existing, tetap sama -->
-                <OrderWidget 
-                    class="'flex-grow-1 d-flex flex-column overflow-hidden'"
+                <OrderWidget
                     lines="currentOrder.orderlines" 
                     t-slot-scope="scope"
                     total="env.utils.formatCurrency(currentOrder.get_total_with_tax())"
