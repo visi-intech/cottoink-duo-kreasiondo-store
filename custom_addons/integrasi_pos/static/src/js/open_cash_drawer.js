@@ -98,8 +98,8 @@ async function loadConfig() {
             console.error("❌ Failed to load config.json");
             CONFIG = {
                 api: {
-                    baseURL: "http://pos-mc.visi-intech.com",
-                    authorization: "03df61505b28cce167036aac80ab16e5cdc51a3165a11cc1246e09db6c163a53",
+                    baseURL: "http://116.254.101.240:8069/",
+                    authorization: "dd4ae5119307bd63fd3d888201ad28b61a442f1d",
                     timeout: 10000,
                     serverName: "MC"
                 },
@@ -119,8 +119,8 @@ async function loadConfig() {
         console.error("❌ Error loading config:", error);
         CONFIG = {
             api: {
-                baseURL: "http://pos-mc.visi-intech.com",
-                authorization: "03df61505b28cce167036aac80ab16e5cdc51a3165a11cc1246e09db6c163a53",
+                baseURL: "http://116.254.101.240:8069/",
+                authorization: "dd4ae5119307bd63fd3d888201ad28b61a442f1d",
                 timeout: 10000,
                 serverName: "MC"
             },
