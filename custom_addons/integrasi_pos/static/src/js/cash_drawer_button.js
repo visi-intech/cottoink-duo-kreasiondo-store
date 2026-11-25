@@ -12,7 +12,7 @@ import { CustomNumpadPopUp } from "./custom_numpad_popup";
 
 export class CashDrawerButton extends Component {
     static template = "CashDrawerButton";
-    static props = { label: { type: String, optional: true } };
+    static props = { label: { type: String, optional: true }, class: { type: String, optional: true } };
 
     setup() {
         this.popup = useService("popup");

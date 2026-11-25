@@ -10,7 +10,7 @@ import { CustomNumpadPopUp } from "./custom_numpad_popup";
 
 export class DiscountAmountButton extends Component {
     static template = "DiscountAmountButton";
-    static props = { label: { type: String, optional: true } };
+    static props = { label: { type: String, optional: true }, class: { type: String, optional: true } };
 
     setup() {
         this.popup = useService("popup");

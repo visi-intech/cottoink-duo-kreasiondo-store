@@ -12,7 +12,7 @@ import { CustomNumpadPopUp } from "./custom_numpad_popup";
 
 export class VoidItemButton extends Component {
     static template = "VoidItemButton";
-    static props = { label: { type: String, optional: true } };
+    static props = { label: { type: String, optional: true }, class: { type: String, optional: true } };
 
     setup() {
         this.popup = useService("popup");
