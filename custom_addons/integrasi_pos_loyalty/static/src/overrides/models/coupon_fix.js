@@ -80,6 +80,7 @@ patch(Order.prototype, {
             }
 
             // 🔑 PERBAIKAN 3: Coupon belum ada di order, fetch dari server
+            if (!existingCoupon) {
             console.log("🆕 Coupon baru, fetch dari server:", code);
             
             const customerId = this.get_partner() ? this.get_partner().id : false;
@@ -98,6 +99,14 @@ patch(Order.prototype, {
             if (successful) {
                 // Gift card validation
                 const program = this.pos.program_by_id[payload.program_id];
+                if (!program) {
+                    // Kupon valid di server, tapi program-nya tidak dimuat di POS ini
+                    return _t(
+                        "Kupon %s valid, tetapi program-nya tidak aktif di POS ini " +
+                        "(cek Point of Sale di program, tanggal berlaku, lalu reload POS).",
+                        code
+                    );
+                }
                 if (program && program.program_type === "gift_card" && !payload.has_source_order) {
                     const { confirmed } = await this.env.services.popup.add(ConfirmPopup, {
                         title: _t("Unpaid gift card"),
@@ -134,6 +143,7 @@ patch(Order.prototype, {
                 console.error("❌ Gagal validasi coupon:", payload.error_message);
                 return payload.error_message;
             }
+            } // end if (!existingCoupon)
         }
         
         console.log("🎯 Claimable rewards:", (claimableRewards || []).map((r) => ({

@@ -70,6 +70,30 @@ function isMemberRewardAllowed(order, reward) {
     return finalResult;
 }
 
+/**
+ * Buang couponPointChanges / codeActivatedCoupons yang program-nya tidak dimuat POS
+ * (mis. order lama tersimpan di browser sebelum loader loyalty diganti, atau program
+ * sudah dinonaktifkan / bukan milik POS ini). Tanpa ini pos_loyalty crash:
+ * "Cannot read properties of undefined (reading 'pricelist_ids')".
+ */
+function pruneUnknownLoyaltyPrograms(order) {
+    const programById = order.pos.program_by_id || {};
+    const changes = order.couponPointChanges || {};
+    for (const key of Object.keys(changes)) {
+        if (!programById[changes[key]?.program_id]) {
+            console.warn("🧹 Buang couponPointChanges dengan program tidak dikenal:", changes[key]);
+            delete changes[key];
+        }
+    }
+    const coupons = order.codeActivatedCoupons || [];
+    for (let i = coupons.length - 1; i >= 0; i--) {
+        if (!programById[coupons[i]?.program_id]) {
+            console.warn("🧹 Buang coupon dengan program tidak dikenal:", coupons[i]);
+            coupons.splice(i, 1);
+        }
+    }
+}
+
 // ========== PATCH ORDER ==========
 const OriginalApplyReward = Order.prototype._applyReward;
 const OriginalUpdateRewards = Order.prototype._updateRewards;
@@ -99,7 +123,13 @@ patch(Order.prototype, {
         return result;
     },
 
+    getPotentialFreeProductRewards() {
+        pruneUnknownLoyaltyPrograms(this);
+        return super.getPotentialFreeProductRewards(...arguments);
+    },
+
     getClaimableRewards(coupon_id = false, program_id = false, auto = false) {
+        pruneUnknownLoyaltyPrograms(this);
         // Gunakan logic asli jika validasi dinonaktifkan
         if (!this.pos.config.validate_member_schedule) {
             // Logic asli Odoo
@@ -394,7 +424,7 @@ patch(Order.prototype, {
         }
         Object.values(this.couponPointChanges || {}).some((pe) => {
             if (pe.coupon_id === coupon_id) {
-                if (this.pos.program_by_id[pe.program_id].applies_on !== "future") {
+                if (this.pos.program_by_id[pe.program_id]?.applies_on !== "future") {
                     points += pe.points;
                 }
                 return true;
