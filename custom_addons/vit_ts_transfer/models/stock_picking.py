@@ -95,13 +95,16 @@ class StockPicking(models.Model):
         return '%s%05d' % (base, batch_counter[base])
 
     # ------------------------------------------------------------------
-    # Destination Warehouse TS Out: dipilih lewat target_location (master.warehouse, hasil sync),
-    # lalu dicocokkan ke stock.warehouse lewat kode gudang, fallback nama gudang.
+    # Destination Warehouse TS Out: dipilih lewat target_location (master.warehouse, hasil sync dari MC,
+    # isinya semua toko). Pencocokan ke stock.warehouse lokal bersifat OPSIONAL: toko tujuan di DB lain
+    # tidak punya pasangan di sini, dan itu normal (Destination Location diisi manual, TS In lokal
+    # tidak dibuat otomatis).
     # ------------------------------------------------------------------
     @api.model
     def _vit_ts_match_stock_warehouse(self, master_warehouse):
-        """stock.warehouse yang cocok dengan master.warehouse (kode dulu, lalu nama).
-        Hanya dikembalikan kalau hasilnya tepat satu; kalau nol atau ambigu -> recordset kosong."""
+        """stock.warehouse lokal yang namanya sama dengan master.warehouse.warehouse_name.
+        Hanya dikembalikan kalau hasilnya tepat satu; kalau nol atau ambigu -> recordset kosong.
+        Kode tidak dipakai: master.warehouse.warehouse_code berisi nama lokasi stock, bukan kode gudang."""
         Warehouse = self.env['stock.warehouse']
         master = master_warehouse.sudo()
         if not master:
@@ -110,14 +113,11 @@ class StockPicking(models.Model):
         # berlebih tidak jadi masalah (tanpa pola LIKE yang perlu di-escape)
         warehouses = Warehouse.search([])
         norm = lambda v: ' '.join((v or '').split()).casefold()
-        for field, master_value in (('code', master.warehouse_code), ('name', master.warehouse_name)):
-            wanted = norm(master_value)
-            if not wanted:
-                continue
-            found = warehouses.filtered(lambda w: norm(w[field]) == wanted)
-            if len(found) == 1:
-                return found
-        return Warehouse
+        wanted = norm(master.warehouse_name)
+        if not wanted:
+            return Warehouse
+        found = warehouses.filtered(lambda w: norm(w.name) == wanted)
+        return found if len(found) == 1 else Warehouse
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -134,9 +134,6 @@ class StockPicking(models.Model):
                     self.env['master.warehouse'].browse(vals['target_location']))
                 if warehouse:
                     vals['vit_ts_warehouse_dest_id'] = warehouse.id
-                else:
-                    _logger.warning("TS Out: target_location %s tidak cocok dengan stock.warehouse manapun",
-                                    vals['target_location'])
             if vals.get('name') not in (None, False, '', '/'):
                 continue
             if self._vit_ts_type_matches(picking_type, TS_OUT_NAME):
@@ -172,29 +169,23 @@ class StockPicking(models.Model):
         # TS Out: target_location berubah -> Destination Warehouse ikut disesuaikan
         if 'target_location' in vals and 'vit_ts_warehouse_dest_id' not in vals:
             for picking in self.filtered('vit_ts_is_ts_out'):
+                # tanpa pasangan -> dikosongkan, supaya tidak tertinggal gudang tujuan lama
                 warehouse = self._vit_ts_match_stock_warehouse(picking.target_location)
-                if warehouse and picking.vit_ts_warehouse_dest_id != warehouse:
+                if picking.vit_ts_warehouse_dest_id != warehouse:
                     picking.vit_ts_warehouse_dest_id = warehouse
         return res
 
     @api.onchange('target_location')
     def _onchange_vit_ts_target_location(self):
-        """TS Out: Destination Warehouse (stock.warehouse) diisi dari target_location, lalu
-        Destination Location diisi transit location gudang itu (kalau ada), kalau tidak stock
-        location gudang itu."""
+        """TS Out: kalau Destination Warehouse punya pasangan stock.warehouse lokal, Destination
+        Location diisi transit location gudang itu (atau stock location-nya). Kalau tidak ada
+        pasangan (toko di DB lain), tidak ada yang diubah: Destination Location diisi manual."""
         if not self.vit_ts_is_ts_out:
             return
         warehouse = self._vit_ts_match_stock_warehouse(self.target_location)
         self.vit_ts_warehouse_dest_id = warehouse
         if warehouse:
             self.location_dest_id = warehouse.location_transit or warehouse.lot_stock_id
-        elif self.target_location:
-            return {'warning': {
-                'title': _("Gudang tidak cocok"),
-                'message': _("Destination Warehouse '%s' tidak cocok dengan gudang manapun "
-                             "(kode atau nama). Destination Location dan TS In otomatis tidak bisa "
-                             "ditentukan; cek kode gudang di master data.",
-                             self.target_location.display_name)}}
 
     @api.onchange('vit_ts_warehouse_dest_id')
     def _onchange_vit_ts_warehouse_dest_id(self):
@@ -278,6 +269,14 @@ class StockPicking(models.Model):
             return self.browse()
         # idempotent: satu TS Out cuma dibuatkan satu TS In
         if self._vit_ts_get_ts_in():
+            return self.browse()
+        # Tujuan toko lain (target_location terisi tapi tidak punya pasangan stock.warehouse di DB ini):
+        # TS In dibuat di toko tujuan lewat sync MC. Jangan buat di sini, karena fallback tujuannya
+        # adalah stock toko pengirim sendiri, sehingga barang yang sudah dikirim bisa "kembali" ke stok lokal.
+        if self.target_location and not self.vit_ts_warehouse_dest_id:
+            self.message_post(body=_(
+                "TS In otomatis tidak dibuat: Destination Warehouse '%s' bukan gudang di database ini. "
+                "TS In dibuat di toko tujuan.", self.target_location.display_name))
             return self.browse()
 
         move_vals = []
