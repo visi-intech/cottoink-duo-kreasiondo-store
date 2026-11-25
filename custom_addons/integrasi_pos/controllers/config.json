@@ -7,17 +7,17 @@
         "password": "993f68fd3df1f930d79027cdd52c63cdb545b304"
     },
     "odoo_db1_a": {
-        "url": "http://172.16.186.51:8069/jsonrpc",
-        "server_name": "Store Kemchick PIK",
-        "db": "store-pik-live-2025",
+        "url": "http://172.16.186.4:8069/jsonrpc",
+        "server_name": "Store Paskal Bandung",
+        "db": "cdk_bdg_testing",
         "username": "admin",
-        "password": "f2dad1d50335c04228a96826695d1cf0626b52eb"
+        "password": "9d51f454ba3442de578f431b3a69d55069ded3bd"
     },
     "odoo_db2_a": {
-        "url": "http://pos-store.visi-intech.com/jsonrpc",
-        "server_name": "Store 02",
-        "db": "store-02",
+        "url": "http://172.16.186.3:8069//jsonrpc",
+        "server_name": "Store Kota Kasablanka",
+        "db": "cdk_kokas_testing",
         "username": "admin",
-        "password": "658b2da4bdec6d2dc882a3ac5510476ac006598d"
+        "password": "9edc4913e9c12575a95e5c9e78708c1bf190d9d7"
     }
 }
