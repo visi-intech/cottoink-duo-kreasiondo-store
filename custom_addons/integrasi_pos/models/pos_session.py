@@ -135,9 +135,11 @@ class PosSession(models.Model):
             ]).mapped('modal')
         )
         
-        # Add total_modal to result
-        result['total_modal'] = total_modal
-        
+        # JANGAN tambah key baru di level atas result: POS mengirim seluruh dict ini
+        # sebagai props ke ClosePosPopup, dan key yang tidak dikenal memicu
+        # OwlError "Invalid props ... unknown key". total_modal sudah ada di
+        # default_cash_details['modal_info'] di bawah.
+
         # Update cash details if cash control is enabled
         if self.config_id.cash_control and result.get('default_cash_details'):
             # IMPORTANT: Update opening to show total modal
