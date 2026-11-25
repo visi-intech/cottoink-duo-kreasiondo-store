@@ -11,6 +11,9 @@ export class CustomSalesPersonPopup extends Component {
         title: String,
         list: Array,
         close: Function,
+        // Popup service Odoo juga mengirim id, resolve, zIndex, dll.
+        // "*" mengizinkan props tambahan itu agar tidak OwlError "unknown key" di mode debug.
+        "*": true,
     };
 
     setup() {

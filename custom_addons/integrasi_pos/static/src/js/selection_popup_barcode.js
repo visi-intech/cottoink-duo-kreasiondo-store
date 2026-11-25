@@ -6,7 +6,8 @@ import { registry } from "@web/core/registry";
 
 export class ProductChoicePopup extends Component {
     static template = "ProductChoicePopup";
-    static props = ["title", "products"];
+    // "*" mengizinkan props dari popup service (id, resolve, zIndex, close, ...)
+    static props = { title: { type: String, optional: true }, products: Array, "*": true };
     static defaultProps = {
         title: "Pilih Produk",
     };
