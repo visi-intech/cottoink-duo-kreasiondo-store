@@ -96,7 +96,7 @@ class StockPicking(models.Model):
 
     def button_validate(self):
         # Blokir TS In jika Quantity < Demand
-        # self._check_ts_in_quantity()
+        self._check_ts_in_quantity()
 
         # Internal Transfers: source & destination tidak boleh sama
         for picking in self:
