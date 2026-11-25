@@ -18,7 +18,7 @@
         </xpath>
         <!-- target_location asli (kolom kanan) disembunyikan di TS Out, karena sudah ada di kolom kiri
              sebagai Destination Warehouse. Dokumen lain tidak berubah. -->
-        <xpath expr="//field[@name='target_location'][not(@string)]" position="attributes">
+        <xpath expr="(//field[@name='target_location'])[1]" position="attributes">
             <attribute name="invisible">picking_type_code not in ['outgoing', 'internal'] or vit_ts_is_ts_out</attribute>
         </xpath>
         <!-- Kolom kiri: Source & Destination Warehouse menggantikan posisi Source & Destination Location
