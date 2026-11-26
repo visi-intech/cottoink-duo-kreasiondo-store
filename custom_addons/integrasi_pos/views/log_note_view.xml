@@ -19,10 +19,37 @@
       </field>
     </record>
 
+    <record model="ir.ui.view" id="view_log_note_search">
+      <field name="name">log.note.search</field>
+      <field name="model">log.note</field>
+      <field name="arch" type="xml">
+        <search string="Log Note">
+            <field name="vit_doc_type" string="Document Type"/>
+            <field name="vit_trx_key" string="Transaction Key"/>
+            <field name="vit_sync_status" string="Sync Status"/>
+            <field name="vit_sync_desc" string="Sync Description"/>
+            <separator/>
+            <filter string="Success" name="filter_sync_success" domain="[('vit_sync_status', '=', 'Success')]"/>
+            <filter string="Failed" name="filter_sync_failed" domain="[('vit_sync_status', '=', 'Failed')]"/>
+            <separator/>
+            <filter string="Transaction Date" name="filter_trx_date" date="vit_trx_date"/>
+            <filter string="Sync Date" name="filter_sync_date" date="vit_sync_date"/>
+            <group expand="0" string="Group By">
+                <filter string="Document Type" name="group_doc_type" context="{'group_by': 'vit_doc_type'}"/>
+                <filter string="Sync Status" name="group_sync_status" context="{'group_by': 'vit_sync_status'}"/>
+                <separator/>
+                <filter string="Transaction Date" name="group_trx_date" context="{'group_by': 'vit_trx_date:day'}"/>
+                <filter string="Sync Date" name="group_sync_date" context="{'group_by': 'vit_sync_date:day'}"/>
+            </group>
+        </search>
+      </field>
+    </record>
+
     <record id="log_note_action" model="ir.actions.act_window">
     <field name="name">Log Note</field>
     <field name="res_model">log.note</field>
     <field name="view_mode">tree</field>
+    <field name="search_view_id" ref="view_log_note_search"/>
     </record>
   </data>
 </odoo>

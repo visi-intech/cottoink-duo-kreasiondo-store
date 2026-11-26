@@ -16,18 +16,36 @@
                 <field name="vit_ts_in_count" widget="statinfo" string="TS In"/>
             </button>
         </xpath>
+        <!-- target_location asli (kolom kanan) disembunyikan di TS Out, karena sudah ada di kolom kiri
+             sebagai Destination Warehouse. Dokumen lain tidak berubah. -->
+        <xpath expr="(//field[@name='target_location'])[1]" position="attributes">
+            <attribute name="invisible">picking_type_code not in ['outgoing', 'internal'] or vit_ts_is_ts_out</attribute>
+        </xpath>
         <!-- Kolom kiri: Source & Destination Warehouse menggantikan posisi Source & Destination Location
              pada TS Out / TS In. Field lokasi aslinya disembunyikan untuk dua tipe itu saja
              (dipindah ke tab Additional Info, group Location Information). -->
         <xpath expr="//field[@name='location_dest_id'][@groups='stock.group_stock_multi_locations']" position="after">
-            <field name="vit_ts_source_warehouse"
-                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+            <field name="vit_ts_source_warehouse_id"
+                   options="{'no_create': True, 'no_quick_create': True}"
+                   invisible="not vit_ts_is_ts_out"
                    readonly="state in ['done', 'cancel']"/>
+            <field name="vit_ts_source_warehouse"
+                   invisible="not vit_ts_is_ts_in"
+                   readonly="state in ['done', 'cancel']"/>
+            <!-- Destination Warehouse (relasi gudang) hanya tampil di TS In; di TS Out diganti
+                 target_location yang labelnya "Destination Warehouse". -->
+            <!-- Di TS Out field ini tidak ditampilkan, tapi tetap ada di form (invisible) dan diisi
+                 otomatis dari target_location; dipakai alur TS In dan penomoran. force_save supaya
+                 nilai dari onchange ikut tersimpan. -->
             <field name="vit_ts_warehouse_dest_id"
                    options="{'no_create': True, 'no_quick_create': True}"
-                   invisible="not vit_ts_is_ts_out and not vit_ts_is_ts_in"
+                   invisible="not vit_ts_is_ts_in"
+                   readonly="1" force_save="1"/>
+            <field name="target_location" string="Destination Warehouse"
+                   options="{'no_create': True, 'no_quick_create': True}"
+                   invisible="not vit_ts_is_ts_out"
                    required="vit_ts_is_ts_out"
-                   readonly="state in ['done', 'cancel'] or vit_ts_is_ts_in"/>
+                   readonly="state in ['assigned', 'done']"/>
         </xpath>
         <xpath expr="//field[@name='location_id'][@groups='stock.group_stock_multi_locations']" position="attributes">
             <attribute name="invisible">picking_type_code == 'incoming' or vit_ts_is_ts_out or vit_ts_is_ts_in</attribute>
