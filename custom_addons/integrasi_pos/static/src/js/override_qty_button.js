@@ -44,7 +44,13 @@ patch(ProductScreen.prototype, {
             delete: "validate_order_line_deletion",
         };
 
-        if (!config.manager_validation || !restrictedModes[mode] || !config[restrictedModes[mode]]) {
+        // Checkbox "Apply Discount" di Settings menyimpan validate_discount_button,
+        // jadi % Disc di numpad ikut flag itu juga (validate_discount tidak punya checkbox).
+        const required = mode === "discount"
+            ? (config.validate_discount || config.validate_discount_button)
+            : config[restrictedModes[mode]];
+
+        if (!config.manager_validation || !restrictedModes[mode] || !required) {
             return true; // No validation required
         }
 
