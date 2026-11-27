@@ -1,6 +1,6 @@
 {
     'name': 'VIT TS Transfer (TS Out / TS In)',
-    'version': '17.0.1.0.0',
+    'version': '17.0.1.0.1',
     'category': 'Inventory',
     'summary': 'Transfer antar gudang TS Out -> TS In otomatis',
     'description': """
