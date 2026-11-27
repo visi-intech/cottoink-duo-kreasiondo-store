@@ -19,6 +19,7 @@ Depends ke stock dan integrasi_pos (field target_location dipakai sebagai Destin
     'data': [
         'security/security_groups.xml',
         'security/ir.model.access.csv',
+        'data/transfer_type_data.xml',
         'views/stock_warehouse_view.xml',
         'views/transfer_menu.xml',
         'views/stock_picking_view.xml',

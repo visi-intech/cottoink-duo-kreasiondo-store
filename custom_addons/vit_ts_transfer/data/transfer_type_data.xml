@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+  <data noupdate="1">
+    <!-- Master data Transfer Type (jenis transaksi) untuk TS Out / TS In.
+         Model di Store: vit.ts.transfer.type. noupdate="1" supaya data yang sudah
+         diubah user tidak ditimpa saat upgrade. -->
+    <record id="transfer_type_alokasi" model="vit.ts.transfer.type">
+      <field name="name">Alokasi</field>
+    </record>
+    <record id="transfer_type_peminjaman_store" model="vit.ts.transfer.type">
+      <field name="name">Peminjaman Store</field>
+    </record>
+    <record id="transfer_type_peminjaman_wh" model="vit.ts.transfer.type">
+      <field name="name">Peminjaman WH</field>
+    </record>
+    <record id="transfer_type_konsolidasi_cdk" model="vit.ts.transfer.type">
+      <field name="name">Konsolidasi CDK</field>
+    </record>
+    <record id="transfer_type_konsolidasi_consigment" model="vit.ts.transfer.type">
+      <field name="name">Konsolidasi Consigment</field>
+    </record>
+    <record id="transfer_type_retur_reject" model="vit.ts.transfer.type">
+      <field name="name">Retur/Reject</field>
+    </record>
+    <record id="transfer_type_retur_slow_moving" model="vit.ts.transfer.type">
+      <field name="name">Retur Slow moving</field>
+    </record>
+  </data>
+</odoo>
