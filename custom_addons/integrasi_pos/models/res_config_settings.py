@@ -33,6 +33,14 @@ class ResConfigSettings(models.TransientModel):
         help="Allow applying multiple discount rewards in a single order. WARNING: This can result in very high total discounts."
     )
 
+    vit_reward_popup_on_add = fields.Boolean(
+        "Reward Popup on Add Product",
+        config_parameter="pos.vit_reward_popup_on_add",
+        help="Setelah kasir menambah produk (klik / scan), tampilkan popup pilih promo / voucher "
+             "untuk reward diskon dengan Discount Applicability = Order. Diskon tersebut tidak lagi "
+             "diterapkan otomatis, kasir yang memilih.",
+    )
+
     # Barcode scanner configuration fields
     digit_awal = fields.Integer(string="Digit Awal", help="Starting position for weight extraction", config_parameter="pos.digit_awal")
     digit_akhir = fields.Integer(string="Digit Akhir", help="Ending position for weight extraction", config_parameter="pos.digit_akhir")

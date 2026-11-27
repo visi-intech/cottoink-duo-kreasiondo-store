@@ -20,6 +20,7 @@
             'integrasi_pos_loyalty/static/src/overrides/models/reward_pos_override.js',
             'integrasi_pos_loyalty/static/src/overrides/models/loyalty_default_customer.js',
             'integrasi_pos_loyalty/static/src/overrides/models/coupon_fix.js',
+            'integrasi_pos_loyalty/static/src/overrides/models/reward_popup_on_add.js',
         ],
     },
     'installable': True,

@@ -89,6 +89,10 @@
                         help="Activate Mutliple Discount.">
                         <field name="allow_multiple_global_discounts"/>
                     </setting>
+                    <setting id="vit_reward_popup_on_add" string="Reward Popup on Add Product"
+                        help="Setelah tambah produk, kasir memilih promo / voucher (diskon Applicability = Order) lewat popup, bukan diterapkan otomatis.">
+                        <field name="vit_reward_popup_on_add"/>
+                    </setting>
                 </block>
             </app>
 
