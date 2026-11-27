@@ -64,5 +64,21 @@
       </field>
     </record>
 
+    <!-- Available On: sembunyikan pilihan "Sales". Aplikasi ini POS Only, jadi opsi Sales
+         bisa memancing pertanyaan dari customer. Hanya disembunyikan (invisible): field
+         sale_ok tetap ada di form, nilainya tetap tersimpan dan tetap ikut sync MC -> Store.
+         Opsi "Point of Sale" tetap tampil. Inherit dari view sale_loyalty (bukan view dasar
+         loyalty) supaya span sale_ok pasti sudah ada saat xpath dijalankan. -->
+    <record model="ir.ui.view" id="view_loyalty_program_form_hide_sales">
+      <field name="name">loyalty.program.form.hide.sales</field>
+      <field name="model">loyalty.program</field>
+      <field name="inherit_id" ref="sale_loyalty.loyalty_program_view_form_inherit_sale_loyalty"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='sale_ok']/parent::span" position="attributes">
+          <attribute name="invisible">1</attribute>
+        </xpath>
+      </field>
+    </record>
+
   </data>
 </odoo>
