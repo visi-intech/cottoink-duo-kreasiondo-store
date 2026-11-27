@@ -46,7 +46,7 @@ jobs:
       ODOO_DB: ${{ matrix.odoo_db }}
       ODOO_PORT: ${{ matrix.port }}
       # Odoo hanya meng-upgrade modul yang sudah ter-install, yang belum di-skip
-      MODULES: 'integrasi_pos,integrasi_pos_loyalty,custom_pos_receipt,custom_receipts_for_pos,pos_receipt_extend,salesperson_pos_order_line,stock_no_negative,vit_ts_transfer,pos_session_sequence'
+      MODULES: 'integrasi_pos,integrasi_pos_loyalty,custom_pos_receipt,custom_receipts_for_pos,pos_receipt_extend,salesperson_pos_order_line,stock_no_negative,vit_ts_transfer,pos_session_sequence,web_responsive'
 
     defaults:
       run:
